@@ -4,9 +4,17 @@ import java.util.ArrayList;
 
 public class RequestAndResponseModel {
 
-    String status_code, status_message, success,Status_code,Success,Status_message;
+    String status_code, status_message, success,Status_code,Success,Status_message,Order_id;
     int tot_cats;
     ArrayList<cat_list> cat_list = new ArrayList<>();
+
+    public String getOrder_id() {
+        return Order_id;
+    }
+
+    public void setOrder_id(String order_id) {
+        Order_id = order_id;
+    }
 
     public ArrayList<RequestAndResponseModel.cat_list> getCat_list() {
         return cat_list;

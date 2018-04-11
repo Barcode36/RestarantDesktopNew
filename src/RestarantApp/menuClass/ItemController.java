@@ -126,16 +126,28 @@ public class ItemController {
 
     private void sendItemDetails(ArrayList checkItem) {
 
+        ArrayList itemList = new ArrayList();
+        for(int j= 0 ; j < checkItem.size() ; j ++)
+        {
+            String item = String.valueOf(j) +":" +checkItem.get(j);
+            itemList.add(item);
+
+        }
+        String list = itemList.toString();
+        list = list.substring(1, list.length()-1);
+        list = "{"+list+"}";
+
         APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
         JSONObject jsonObject = new JSONObject();
         outputImage = UtilsClass.encodeToString(bufferedImage,"png");
         try {
+            JSONObject item = new JSONObject(list);
             jsonObject.put("item_name",txtItem.getText());
             jsonObject.put("short_code",txtItemId.getText());
             jsonObject.put("item_desc",itemDes.getText());
             jsonObject.put( "item_image",outputImage);
             jsonObject.put("item_price",txtPrice.getText());
-            jsonObject.put("item_cat_list",checkItem);
+            jsonObject.put("item_cat_list",item);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -143,6 +155,7 @@ public class ItemController {
         call.enqueue(new Callback<RequestAndResponseModel>() {
             @Override
             public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+                
                 if (response.isSuccessful()) {
                     RequestAndResponseModel requestAndResponseModel = response.body();
                     System.out.println("select index------->"+requestAndResponseModel.getStatus_message());

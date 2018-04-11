@@ -1,6 +1,7 @@
 package RestarantApp.Network;
 
 import RestarantApp.model.ItemListRequestAndResponseModel;
+import RestarantApp.model.LoginRequestAndResponse;
 import RestarantApp.model.RequestAndResponseModel;
 import org.json.JSONObject;
 import retrofit2.Call;
@@ -9,6 +10,10 @@ import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.POST;
 
 public interface APIService {
+
+    @FormUrlEncoded
+    @POST("check_client_details.php")
+    Call<LoginRequestAndResponse> getLoginResponse(@Field("x") JSONObject jsonObject);
 
     @FormUrlEncoded
     @POST("category_add.php")
@@ -97,5 +102,9 @@ public interface APIService {
     @FormUrlEncoded
     @POST("table_edit.php")
     Call<RequestAndResponseModel> updateTable(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("place_order.php")
+    Call<RequestAndResponseModel> placeOrder(@Field("x") JSONObject object);
 
 }

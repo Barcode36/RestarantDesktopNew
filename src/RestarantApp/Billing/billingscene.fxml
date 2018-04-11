@@ -2,6 +2,7 @@
 
 <?import RestarantApp.aaditionalClass.AutoCompleteTextField?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -148,7 +149,7 @@
                         <Font name="Times New Roman Bold" size="18.0" />
                      </font>
                   </Label>
-                  <Label layoutX="6.0" layoutY="343.0" text="Through Card :" textFill="WHITE">
+                  <Label layoutX="6.0" layoutY="307.0" text="Payment Option :" textFill="WHITE">
                      <font>
                         <Font name="Times New Roman Bold" size="18.0" />
                      </font>
@@ -159,12 +160,6 @@
                   <TextField fx:id="txtTotal" layoutX="165.0" layoutY="170.0" prefHeight="25.0" prefWidth="127.0" />
                   <TextField fx:id="txtRounding" layoutX="165.0" layoutY="213.0" prefHeight="25.0" prefWidth="127.0" />
                   <TextField fx:id="txtNetAmount" layoutX="165.0" layoutY="257.0" prefHeight="25.0" prefWidth="127.0" />
-                  <TextField layoutX="164.0" layoutY="340.0" prefHeight="25.0" prefWidth="127.0" />
-                  <Label layoutX="3.0" layoutY="304.0" text="Cash To be Received:" textFill="WHITE">
-                     <font>
-                        <Font name="Times New Roman Bold" size="17.0" />
-                     </font>
-                  </Label>
                   <TextField fx:id="txtFiledDiscount" layoutX="92.0" layoutY="47.0" prefHeight="25.0" prefWidth="47.0" />
                   <Label layoutX="138.0" layoutY="52.0" text="\%" textFill="WHITE">
                      <font>
@@ -172,6 +167,17 @@
                      </font>
                   </Label>
                   <TextField fx:id="txtTotalAmount" layoutX="166.0" layoutY="15.0" prefHeight="25.0" prefWidth="127.0" />
+                  <ChoiceBox fx:id="comboPaymentMethod" layoutX="164.0" layoutY="303.0" prefHeight="25.0" prefWidth="127.0" />
+                  <ImageView fitHeight="30.0" fitWidth="90.0" layoutX="59.0" layoutY="344.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/printof.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fitHeight="30.0" fitWidth="87.0" layoutX="168.0" layoutY="345.0" onMouseClicked="#btnCloseOrder" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/placeorder.png" />
+                     </image>
+                  </ImageView>
                </children>
             </AnchorPane>
          </children>
@@ -212,7 +218,7 @@
                   <Image url="@../images/addi.png" />
                </image>
             </ImageView>
-            <ImageView fitHeight="30.0" fitWidth="111.0" layoutX="691.0" layoutY="12.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fitHeight="30.0" fitWidth="111.0" layoutX="691.0" layoutY="12.0" onMouseClicked="#imgAddNewOrder" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../images/neworder.png" />
                </image>

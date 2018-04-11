@@ -12,7 +12,9 @@ import RestarantApp.chat.rabbitmq_stomp.Listener;
 import RestarantApp.menuClass.ViewCategoryController;
 import RestarantApp.model.Constants;
 import RestarantApp.model.ItemListRequestAndResponseModel;
+import RestarantApp.model.LoginRequestAndResponse;
 import RestarantApp.model.RequestAndResponseModel;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -23,9 +25,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -33,6 +38,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 import org.json.JSONArray;
@@ -42,10 +50,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
-public class BillingController implements Initializable, ItemSelectedListener, GetFromServerListener, NetworkChangeListener {
+public class BillingController implements Initializable, ItemSelectedListener, GetFromServerListener, NetworkChangeListener{
 
     @FXML
     AnchorPane billingRootPane;
@@ -64,6 +73,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     Set<String> itemId =  new HashSet<>();
     int intTaxPrice;
     ArrayList<ItemListRequestAndResponseModel.item_list> billingItemDetails = new ArrayList<>();
+    LoginRequestAndResponse loginRequestAndResponse = LoginRequestAndResponse.getInstance();
     @FXML
     TableView<BillingModel> tableBill;
     @FXML
@@ -72,15 +82,20 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     TextField txtQty,txtTotalAmount,txtFiledDiscount,txtFiledDiscountAmount,txtFileldGross,txtGstPercent,txtTotal,txtRounding,txtNetAmount;
     ObservableList<BillingModel> modelObservableList = FXCollections.observableArrayList();
     ItemListRequestAndResponseModel.item_list selectedItem;
+    @FXML
+    ChoiceBox comboPaymentMethod;
     double subTotal;
     int serialNo = 1;
     ArrayList<Integer> itemIdList = new ArrayList<>();
     HashMap<Integer,Integer> getTaxListDetails = new HashMap<>();
     ObservableList<String> tableList = FXCollections.observableArrayList();
     HashMap<String,ObservableList<BillingModel>> tableListValue = new HashMap<>();
-    String selectedTable;
+    String selectedTable,from;
     @FXML
     ListView<String> listTableList;
+    AddNewItemListener addNewItemListener;
+    String customer_id;
+    boolean isPlacedOrder = true;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         itemLoadProgres.setVisible(false);
@@ -142,20 +157,55 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 if (newValue != null) {
                     selectedTable = newValue;
-                    modelObservableList = tableListValue.get(newValue);
-                    tableBill.setItems(modelObservableList);
-                    itemIdList = new ArrayList<>();
-                    for (int k = 0; k < modelObservableList.size(); k++) {
-                        BillingModel billingModel = modelObservableList.get(k);
-                            itemIdList.add(Integer.parseInt(billingModel.getItem_id()));
-
+                    if (modelObservableList.size() != 0) {
+                        modelObservableList = tableListValue.get(newValue);
                     }
-                    setSubTotal();
+                    if (tableListValue.containsKey(newValue)) {
+
+                        modelObservableList = tableListValue.get(newValue);
+                        tableBill.setItems(modelObservableList);
+                        itemIdList = new ArrayList<>();
+                        if (modelObservableList.size() != 0) {
+                            for (int k = 0; k < modelObservableList.size(); k++) {
+                                BillingModel billingModel = modelObservableList.get(k);
+                                itemIdList.add(Integer.parseInt(billingModel.getItem_id()));
+                                customer_id = billingModel.getCustomer_id();
+                            }
+                            setSubTotal();
+                        }
+                    }else
+                    {
+                        modelObservableList = FXCollections.observableArrayList();
+                        tableBill.setItems(modelObservableList);
+                        itemIdList = new ArrayList<>();
+                    }
+
 
                 }
 
             }
         });
+
+        addNewItemListener = new AddNewItemListener() {
+            @Override
+            public void addNewItem() {
+
+
+                tableList.add(loginRequestAndResponse.getName());
+                listTableList.setItems(tableList);
+                modelObservableList = FXCollections.observableArrayList();
+                serialNo = 1;
+                from = "parcel";
+                customer_id = loginRequestAndResponse.getCustomer_id();
+//                tableListValue.put(loginRequestAndResponse.getCustomer_id(),modelObservableList);
+            }
+        };
+
+        comboPaymentMethod.getItems().add("Cash");
+        comboPaymentMethod.getItems().add("Card");
+        comboPaymentMethod.getItems().add("Paytm");
+        comboPaymentMethod.getItems().add("Others");
+        comboPaymentMethod.getSelectionModel().selectFirst();
     }
 
 
@@ -197,7 +247,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 billingModel.setAmount(amount);
                 modelObservableList.set(event.getTablePosition().getRow(),billingModel);
                 setSubTotal();
-                sendToMobile(selectedTable);
+                if (billingModel.getFrom().equals("mobile"))
+                    sendToMobile(selectedTable);
             }
         });
 
@@ -342,7 +393,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             @Override
             public void run() {
                 if (selectedItem != null) {
-
+                    BillingModel billingModel;
                     if (itemIdList.size() != 0) {
                         int itemId = Integer.parseInt(selectedItem.getShort_code());
                         System.out.println(itemId);
@@ -359,7 +410,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                     amt = amt * price;
                                     String amount = String.valueOf(amt);
                                     serialNo = billingModelList.getS_no();
-                                    BillingModel billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), String.valueOf(newQty), selectedItem.getPrice(), amount, selectedItem.getShort_code());
+                                     billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), String.valueOf(newQty), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from);
                                     modelObservableList.set(j, billingModel);
                                     setSubTotal();
                                 }
@@ -369,7 +420,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             double price = Double.valueOf(selectedItem.getPrice());
                             amt = amt * price;
                             String amount = String.valueOf(amt);
-                            BillingModel billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code());
+                             billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from);
                             modelObservableList.add(billingModel);
                             tableBill.setItems(modelObservableList);
                             itemIdList.add(Integer.parseInt(selectedItem.getShort_code()));
@@ -380,13 +431,18 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         double price = Double.valueOf(selectedItem.getPrice());
                         amt = amt * price;
                         String amount = String.valueOf(amt);
-                        BillingModel billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code());
+                        billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from);
                         modelObservableList.add(billingModel);
                         tableBill.setItems(modelObservableList);
                         itemIdList.add(Integer.parseInt(selectedItem.getShort_code()));
                         setSubTotal();
                     }
-                    sendToMobile(selectedTable);
+                    if (from.equals("mobile")) {
+                        sendToMobile(selectedTable);
+                    }else
+                    {
+                        tableListValue.put(loginRequestAndResponse.getName(),modelObservableList);
+                    }
 
                     txtFieldId.clear();
                     txtFieldName.clear();
@@ -814,8 +870,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             try {
                                 if (itemList.getString("from").equals("mobile")) {
                                     System.out.println(body);
+                                    serialNo = 1;
                                     if (itemList.has("Item_list")) {
                                         JSONArray itemListArray = itemList.getJSONArray("Item_list");
+                                        String customer_id_from = itemList.getString("cus_id");
                                         for (int j = 0; j < itemListArray.length(); j++) {
                                             JSONObject item = itemListArray.getJSONObject(j);
                                             serialNo = serialNo + j;
@@ -823,11 +881,12 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                             String qty = item.getString("qty");
                                             String rate = item.getString("price");
                                             String shortCode = item.getString("short_code");
+
                                             double amt = Double.valueOf(qty);
                                             double price = Double.valueOf(rate);
                                             amt = amt * price;
                                             String amount = String.valueOf(amt);
-                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode);
+                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode,customer_id_from,"mobile");
                                             modelObservableList.add(billingModel);
                                             /*Platform.runLater(new Runnable() {
                                                 @Override
@@ -846,6 +905,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                itemIdList.add(Integer.parseInt(selectedItem.getShort_code()));
                                setSubTotal();  */
                                         }
+                                        customer_id = customer_id_from;
                                         tableListValue.put(table, modelObservableList);
                                     }
                                 }
@@ -857,17 +917,16 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                 }else //already contains a table
                 {
-                    Platform.runLater(new Runnable(){
 
-                        @Override
-                        public void run() {
                             tableListValue.remove(table);
                             modelObservableList = FXCollections.observableArrayList();
                             try {
-                                if (itemList.getString("from").equals("mobile")) {
+//                                if (itemList.getString("from").equals("mobile")) {
                                     System.out.println(body);
                                     if (itemList.has("Item_list")) {
                                         JSONArray itemListArray = itemList.getJSONArray("Item_list");
+                                        String customer_id_from = itemList.getString("cus_id");
+                                        serialNo = 1;
                                         for (int j = 0; j < itemListArray.length(); j++) {
                                             JSONObject item = itemListArray.getJSONObject(j);
                                             serialNo = serialNo + j;
@@ -879,10 +938,12 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                             double price = Double.valueOf(rate);
                                             amt = amt * price;
                                             String amount = String.valueOf(amt);
-                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode);
+                                            from = "mobile";
+                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode,customer_id_from,from);
                                             modelObservableList.add(billingModel);
                                         }
                                         tableListValue.put(table, modelObservableList);
+                                        customer_id = customer_id_from;
                                         if (selectedTable.equals(table))
                                         {
                                             tableBill.getItems().clear();
@@ -891,14 +952,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                             setSubTotal();
                                         }
                                     }
-                                }
+//                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
-                        }
 
-
-                    });
                     
                 }}
 
@@ -924,6 +982,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         try {
         json.put("table", selectedTable);
         json.put("from", "Desktop");
+        json.put("cus_id",customer_id);
         JSONArray itemArray = new JSONArray();
      for (int i= 0; i< tempModelList.size();i++)
      {
@@ -995,4 +1054,109 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         {
         }
     }
+
+    public void btnCloseOrder(MouseEvent mouseEvent) {
+        if (isPlacedOrder)
+        {
+            placedOrder();
+        }
+    }
+
+    private void placedOrder() {
+        itemLoadProgres.setVisible(true);
+        retrofitService = RetrofitClient.getClient().create(APIService.class);
+        String payment_method = String.valueOf(comboPaymentMethod.getSelectionModel().getSelectedItem());
+        String method = "";
+        if (payment_method.equals("Cash"))
+        {
+            method = "1";
+        }else if (payment_method.equals("Card"))
+        {
+            method = "2";
+        }else if (payment_method.equals("Paytm"))
+        {
+            method = "3";
+        }else if (payment_method.equals("Others"))
+        {
+            method = "4";
+        }
+        ArrayList listArray = new ArrayList();
+        for (int j = 0 ; j < modelObservableList.size(); j++)
+        {
+            BillingModel billingModel = modelObservableList.get(j);
+            String billItem = billingModel.getItem_id() +":"+billingModel.getQuantity();
+            listArray.add(billItem);
+        }
+        String list = listArray.toString();
+        list = list.substring(1, list.length()-1);
+        list = "{"+list+"}";
+        JSONObject itemList = null;
+
+        String getFrom;
+        if (from.equals("parcel"))
+        {
+            getFrom = "Parcel";
+        }else
+        {
+            getFrom = selectedTable;
+        }
+        double total_amount = Double.parseDouble(txtTotalAmount.getText());
+        double gross_amount = Double.parseDouble(txtFileldGross.getText());
+        double tax_amount = total_amount - gross_amount;
+        String tax = String.valueOf(tax_amount);
+        String dis_amount = " ";
+        if (!txtFiledDiscountAmount.getText().isEmpty())
+            dis_amount = txtFiledDiscountAmount.getText();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            itemList = new JSONObject(list);
+            jsonObject.put("customer_id",customer_id);
+            jsonObject.put("net_amount",txtNetAmount.getText().trim());
+            jsonObject.put("tax_amount",tax);
+            jsonObject.put("gross_amount",txtFileldGross.getText().trim());
+            jsonObject.put("payment_method",method);
+            jsonObject.put("item_list",itemList);
+            jsonObject.put("discount_amount",dis_amount);
+            jsonObject.put("table_no",getFrom);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Call<RequestAndResponseModel> placeOrder = retrofitService.placeOrder(jsonObject);
+       placeOrder.enqueue(new Callback<RequestAndResponseModel>() {
+           @Override
+           public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+               itemLoadProgres.setVisible(false);
+               if (response.isSuccessful())
+               {
+                   RequestAndResponseModel requestAndResponseModel = response.body();
+                   System.out.println(requestAndResponseModel.getOrder_id());
+               }
+           }
+
+           @Override
+           public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
+
+           }
+       });
+    }
+
+
+    public void imgAddNewOrder(MouseEvent mouseEvent) {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/RestarantApp/Billing/add_new_item.fxml"));
+        Parent root1 = null;
+        try {
+            root1 = (Parent) fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        AddNewItemController addNewItemController = new AddNewItemController();
+        addNewItemController.setAddItemListener(addNewItemListener);
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setScene(new Scene(root1));
+        stage.show();
+    }
+
+
 }
