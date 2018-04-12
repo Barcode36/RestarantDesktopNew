@@ -53,9 +53,9 @@
                         <Image url="@../images/refres.png" />
                      </image>
                   </ImageView>
-                  <ImageView fitHeight="30.0" fitWidth="111.0" layoutX="1235.0" layoutY="113.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="imgConectionStatus" fitHeight="30.0" fitWidth="90.0" layoutX="1235.0" layoutY="113.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../images/offline.png" />
+                        <Image url="@../images/online.png" />
                      </image>
                   </ImageView>
                   <ImageView fitHeight="30.0" fitWidth="87.0" layoutX="1144.0" layoutY="113.0" pickOnBounds="true" preserveRatio="true">

@@ -9,6 +9,7 @@ import RestarantApp.aaditionalClass.EditingCell;
 import RestarantApp.chat.GetFromServerListener;
 import RestarantApp.chat.rabbitmq_server.RabbitmqServer;
 import RestarantApp.chat.rabbitmq_stomp.Listener;
+import RestarantApp.database.SqliteConnection;
 import RestarantApp.menuClass.ViewCategoryController;
 import RestarantApp.model.Constants;
 import RestarantApp.model.ItemListRequestAndResponseModel;
@@ -49,9 +50,12 @@ import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import sun.audio.AudioPlayer;
+import sun.audio.AudioStream;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.sql.Connection;
 import java.util.*;
 
 public class BillingController implements Initializable, ItemSelectedListener, GetFromServerListener, NetworkChangeListener{
@@ -86,6 +90,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     ChoiceBox comboPaymentMethod;
     double subTotal;
     int serialNo = 1;
+    boolean isConnectedNetwork;
     ArrayList<Integer> itemIdList = new ArrayList<>();
     HashMap<Integer,Integer> getTaxListDetails = new HashMap<>();
     ObservableList<String> tableList = FXCollections.observableArrayList();
@@ -96,8 +101,28 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     AddNewItemListener addNewItemListener;
     String customer_id;
     boolean isPlacedOrder = true;
+    Connection connection;
+    SqliteConnection sqliteConnection;
+    @FXML
+    ImageView imgConectionStatus;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //database connecttivity
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                connection = SqliteConnection.connector();
+                     if (connection == null)
+                             {
+                                 System.out.println("Connection not successfull");
+                             }else
+                                 {
+                                System.out.println("Connection  successfull");
+            sqliteConnection = new SqliteConnection();
+                                }
+            }
+        });
+        t.start();
+
         itemLoadProgres.setVisible(false);
         itemLoadProgres.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
 
@@ -110,6 +135,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         new RabbitmqServer(this).execute();
         setTableDetails();
         NetworkConnection networkConnection = new NetworkConnection(BillingController.this);
+
 
         getData();
         taxList();
@@ -206,6 +232,26 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         comboPaymentMethod.getItems().add("Paytm");
         comboPaymentMethod.getItems().add("Others");
         comboPaymentMethod.getSelectionModel().selectFirst();
+
+        isConnectedNetwork =  networkConnection.isInternetReachable();
+        FileInputStream input = null;
+       if (isConnectedNetwork) {
+
+           try {
+               input = new FileInputStream("src/RestarantApp/images/online.png");
+           } catch (FileNotFoundException e) {
+               e.printStackTrace();
+           }
+       }else
+       {
+           try {
+               input = new FileInputStream("src/RestarantApp/images/offline.png");
+           } catch (FileNotFoundException e) {
+               e.printStackTrace();
+           }
+       }
+        Image image = new Image(input);
+        imgConectionStatus.setImage(image);
     }
 
 
@@ -907,12 +953,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                         }
                                         customer_id = customer_id_from;
                                         tableListValue.put(table, modelObservableList);
+                                        playMusic(table);
                                     }
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
+
                     });
 
                 }else //already contains a table
@@ -944,6 +992,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                         }
                                         tableListValue.put(table, modelObservableList);
                                         customer_id = customer_id_from;
+                                        Platform.runLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                playMusic(table);
+
+                                            }
+                                        });
+
                                         if (selectedTable.equals(table))
                                         {
                                             tableBill.getItems().clear();
@@ -952,13 +1008,16 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                             setSubTotal();
                                         }
                                     }
+
 //                                }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
 
                     
-                }}
+                }
+
+            }
 
 
         } catch (JSONException e) {
@@ -967,8 +1026,49 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     }
 
+    public  void playMusic(String table)
+    {
+        InputStream music = null;
+
+        try {
+            music = new FileInputStream(new File("src/RestarantApp/sound/beep.wav"));
+            AudioStream audio =new AudioStream(music);
+            AudioPlayer.player.start(audio);
+            System.out.println("play music");
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(e);
+        }
+        Constants.showAlert(Alert.AlertType.INFORMATION,"From Table",null,"Got a Order From"+table);
+
+
+
+
+    }
+
+
     @Override
     public void Networkchanged(boolean isConnected) {
+        FileInputStream input = null;
+        if (isConnected) {
+
+            isConnectedNetwork = isConnected;
+            try {
+                input = new FileInputStream("src/RestarantApp/images/online.png");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }else
+        {
+            isConnectedNetwork = isConnected;
+            try {
+                input = new FileInputStream("src/RestarantApp/images/offline.png");
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        Image image = new Image(input);
+        imgConectionStatus.setImage(image);
 //        System.out.println("network check---------->"+isConnected);
     }
 
@@ -1056,10 +1156,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     }
 
     public void btnCloseOrder(MouseEvent mouseEvent) {
-        if (isPlacedOrder)
+        insertIntoDb();
+      /*  if (isPlacedOrder)
         {
             placedOrder();
-        }
+        }*/
     }
 
     private void placedOrder() {
@@ -1159,4 +1260,91 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     }
 
 
+    public void insertIntoDb()
+    {
+        /*if (sqliteConnection != null)
+        {
+          int tableCount =  sqliteConnection.tableCount();
+            if (tableCount == 0) {
+                sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount);
+            }else
+            {
+                sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount);
+            }
+            System.out.println(   sqliteConnection.getLastRow());
+            for (int i =0 ; i < modelObservableList.size() ; i++)
+            {
+                BillingModel billingModel = modelObservableList.get(i);
+                sqliteConnection.insertDataToOrderITEMMaster(sqliteConnection.getLastRow(),billingModel.getItem_id(),billingModel.getQuantity());
+            }
+            String payment_method = String.valueOf(comboPaymentMethod.getSelectionModel().getSelectedItem());
+            String method = "";
+            if (payment_method.equals("Cash"))
+            {
+                method = "1";
+            }else if (payment_method.equals("Card"))
+            {
+                method = "2";
+            }else if (payment_method.equals("Paytm"))
+            {
+                method = "3";
+            }else if (payment_method.equals("Others"))
+            {
+                method = "4";
+            }
+            String getFrom;
+            if (from.equals("parcel"))
+            {
+                getFrom = "Parcel";
+            }else
+            {
+                getFrom = selectedTable;
+            }
+            double total_amount = Double.parseDouble(txtTotalAmount.getText());
+            double gross_amount = Double.parseDouble(txtFileldGross.getText());
+            double tax_amount = total_amount - gross_amount;
+            String tax = String.valueOf(tax_amount);
+            String dis_amount = " ";
+            if (!txtFiledDiscountAmount.getText().isEmpty())
+                dis_amount = txtFiledDiscountAmount.getText();
+
+
+            sqliteConnection.insertDataToOrderAmountMaster(sqliteConnection.getLastRow(),getFrom,txtNetAmount.getText().trim(),tax,txtFileldGross.getText().trim(),dis_amount,method);
+
+
+
+        }*/
+
+        ArrayList<BillingSaveModel>billingSaveModels = sqliteConnection.getAllData();
+        ArrayList<Integer> orderID = new ArrayList();
+        for (int i = 0 ; i <billingSaveModels.size();i++)
+        {
+            BillingSaveModel billingSaveModel = billingSaveModels.get(i);
+            int order_id = billingSaveModel.getOreder_id();
+            if (!orderID.contains(order_id))
+            {
+                orderID.add(order_id);
+            }
+        }
+
+        for (int j = 0 ; j < orderID.size();j++)
+        {
+            int order_id = orderID.get(j);
+            for (int i = 0 ; i < billingSaveModels.size();i++)
+            {
+                BillingSaveModel billingSaveModel = billingSaveModels.get(i);
+                if (order_id == billingSaveModel.getOreder_id())
+                {
+                    System.out.println("bill"+order_id +"---->"+billingSaveModel.getItem_id() +" qty--->"+billingSaveModel.getQty());
+                }
+            }
+
+        }
+
+        /*if (!isConnectedNetwork)
+        {
+
+        }
+*/
+    }
 }
