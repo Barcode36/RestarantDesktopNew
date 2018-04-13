@@ -7,7 +7,31 @@ public class LoginRequestAndResponse {
         return ourInstance;
     }
 
-    public String status_code,status_message,no_of_visit,success,customer_id,name;
+    public String status_code,status_message,no_of_visit,success,customer_id,name,mobile_num,customer_email,customer_address;
+
+    public String getMobile_num() {
+        return mobile_num;
+    }
+
+    public void setMobile_num(String mobile_num) {
+        this.mobile_num = mobile_num;
+    }
+
+    public String getCustomer_email() {
+        return customer_email;
+    }
+
+    public void setCustomer_email(String customer_email) {
+        this.customer_email = customer_email;
+    }
+
+    public String getCustomer_address() {
+        return customer_address;
+    }
+
+    public void setCustomer_address(String customer_address) {
+        this.customer_address = customer_address;
+    }
 
     public String getName() {
         return name;

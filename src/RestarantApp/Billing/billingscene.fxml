@@ -173,7 +173,7 @@
                         <Image url="@../images/printof.png" />
                      </image>
                   </ImageView>
-                  <ImageView fitHeight="30.0" fitWidth="87.0" layoutX="168.0" layoutY="345.0" onMouseClicked="#btnCloseOrder" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="imgPlaceOrder" fitHeight="30.0" fitWidth="87.0" layoutX="168.0" layoutY="345.0" onMouseClicked="#btnCloseOrder" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/placeorder.png" />
                      </image>
@@ -213,7 +213,7 @@
                   <Image url="@../images/searchicon.png" />
                </image>
             </ImageView>
-            <ImageView fitHeight="34.0" fitWidth="111.0" layoutX="577.0" layoutY="11.0" onMouseClicked="#btnAddItem" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="btnAddItem" fitHeight="34.0" fitWidth="111.0" layoutX="577.0" layoutY="11.0" onMouseClicked="#btnAddItem" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../images/addi.png" />
                </image>

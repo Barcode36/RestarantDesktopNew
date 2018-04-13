@@ -71,20 +71,33 @@ public class NetworkConnection {
                             Object objData = urlConnect.getContent();
                             networkChangeListener.Networkchanged(true);
                             isConnected = true;
+
                         }catch (NoRouteToHostException e)
                         {
                             networkChangeListener.Networkchanged(false);
                             isConnected = false;
+
+                        }catch (UnknownHostException e)
+                        {
+                            networkChangeListener.Networkchanged(false);
+                            isConnected = false;
+
+                        }catch (ConnectException e)
+                        {
+                            networkChangeListener.Networkchanged(false);
+                            isConnected = false;
+
                         }
 
                     } catch (IOException e) {
                         e.printStackTrace();
                         networkChangeListener.Networkchanged(false);
                         isConnected = false;
+
                     }
 
                     try {
-                        sleep(2000);
+                        sleep(1000);
                     }catch (InterruptedException e)
                     {
                         e.printStackTrace();
@@ -93,7 +106,6 @@ public class NetworkConnection {
             }
         };
         thread.start();
-
         return isConnected;
 
     }

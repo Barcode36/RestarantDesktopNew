@@ -85,6 +85,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     @FXML
     TextField txtQty,txtTotalAmount,txtFiledDiscount,txtFiledDiscountAmount,txtFileldGross,txtGstPercent,txtTotal,txtRounding,txtNetAmount;
     ObservableList<BillingModel> modelObservableList = FXCollections.observableArrayList();
+    ObservableList<BillingSaveModel> offlineModeList = FXCollections.observableArrayList();
+
     ItemListRequestAndResponseModel.item_list selectedItem;
     @FXML
     ChoiceBox comboPaymentMethod;
@@ -103,8 +105,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     boolean isPlacedOrder = true;
     Connection connection;
     SqliteConnection sqliteConnection;
+    Alert alert;
     @FXML
-    ImageView imgConectionStatus;
+    ImageView imgConectionStatus,imgPlaceOrder,btnAddItem;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //database connecttivity
@@ -223,6 +226,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 serialNo = 1;
                 from = "parcel";
                 customer_id = loginRequestAndResponse.getCustomer_id();
+                NetworkConnection networkConnection = new NetworkConnection(BillingController.this);
+
 //                tableListValue.put(loginRequestAndResponse.getCustomer_id(),modelObservableList);
             }
         };
@@ -252,6 +257,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
        }
         Image image = new Image(input);
         imgConectionStatus.setImage(image);
+
+
+        alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Please Wait");
+        alert.setHeaderText("Save to Server");
+        alert.setContentText("Your OFFline data save to server is processing");
+        alert.getButtonTypes().remove(0);
     }
 
 
@@ -1049,8 +1061,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     @Override
     public void Networkchanged(boolean isConnected) {
-        FileInputStream input = null;
-        if (isConnected) {
+
+//        Platform.runLater(new Runnable() {
+//            @Override
+//            public void run() {
+                FileInputStream input = null;
+
+                if (isConnected) {
 
             isConnectedNetwork = isConnected;
             try {
@@ -1058,6 +1075,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
+
+            if (sqliteConnection != null) {
+                int tableCount = sqliteConnection.tableCount();
+                if (tableCount != 0) {
+                    saveToServer();
+                }
+            }
+
         }else
         {
             isConnectedNetwork = isConnected;
@@ -1069,7 +1094,73 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         }
         Image image = new Image(input);
         imgConectionStatus.setImage(image);
-//        System.out.println("network check---------->"+isConnected);
+
+//
+//            }
+//        });
+    }
+
+    private void saveToServer() {
+
+
+        if (!alert.isShowing()) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    alert.showAndWait();
+
+                }
+            });
+
+            ArrayList<BillingSaveModel> billingSaveModels = sqliteConnection.getAllData();
+            ArrayList<Integer> orderID = new ArrayList();
+            for (int i = 0; i < billingSaveModels.size(); i++) {
+                BillingSaveModel billingSaveModel = billingSaveModels.get(i);
+                int order_id = billingSaveModel.getOreder_id();
+                if (!orderID.contains(order_id)) {
+                    orderID.add(order_id);
+                }
+            }
+
+            for (int j = 0; j < orderID.size(); j++) {
+                offlineModeList = FXCollections.observableArrayList();
+                int order_id = orderID.get(j);
+                for (int i = 0; i < billingSaveModels.size(); i++) {
+                    BillingSaveModel billingSaveModel = billingSaveModels.get(i);
+                    if (order_id == billingSaveModel.getOreder_id()) {
+                        System.out.println("bill" + order_id + "---->" + billingSaveModel.getItem_id() + " qty--->" + billingSaveModel.getQty());
+                        offlineModeList.add(billingSaveModel);
+                    }
+                }
+                placedOrder("offline");
+               int k = j;
+
+               Platform.runLater(new Runnable() {
+                   @Override
+                   public void run() {
+
+                       if (offlineModeList.size()-1 == k) {
+                           alert.setResult(ButtonType.CANCEL);
+                           alert.hide();
+                           sqliteConnection.deletOrderTable();
+                           sqliteConnection.deletOrderItemAountTable();
+                           sqliteConnection.deletOrderItemTable();
+                       }
+                   }
+               });
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+
+
+        }
+
     }
 
     public void sendToMobile(String selectedTable)
@@ -1156,89 +1247,176 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     }
 
     public void btnCloseOrder(MouseEvent mouseEvent) {
-        insertIntoDb();
+        if (isConnectedNetwork)
+        {
+            placedOrder("online");
+        }else
+        {
+            insertIntoDb();
+        }
+
+
+
       /*  if (isPlacedOrder)
         {
             placedOrder();
         }*/
     }
 
-    private void placedOrder() {
+    private void placedOrder(String from) {
         itemLoadProgres.setVisible(true);
-        retrofitService = RetrofitClient.getClient().create(APIService.class);
-        String payment_method = String.valueOf(comboPaymentMethod.getSelectionModel().getSelectedItem());
-        String method = "";
-        if (payment_method.equals("Cash"))
-        {
-            method = "1";
-        }else if (payment_method.equals("Card"))
-        {
-            method = "2";
-        }else if (payment_method.equals("Paytm"))
-        {
-            method = "3";
-        }else if (payment_method.equals("Others"))
-        {
-            method = "4";
-        }
-        ArrayList listArray = new ArrayList();
-        for (int j = 0 ; j < modelObservableList.size(); j++)
-        {
-            BillingModel billingModel = modelObservableList.get(j);
-            String billItem = billingModel.getItem_id() +":"+billingModel.getQuantity();
-            listArray.add(billItem);
-        }
-        String list = listArray.toString();
-        list = list.substring(1, list.length()-1);
-        list = "{"+list+"}";
-        JSONObject itemList = null;
-
-        String getFrom;
-        if (from.equals("parcel"))
-        {
-            getFrom = "Parcel";
-        }else
-        {
-            getFrom = selectedTable;
-        }
-        double total_amount = Double.parseDouble(txtTotalAmount.getText());
-        double gross_amount = Double.parseDouble(txtFileldGross.getText());
-        double tax_amount = total_amount - gross_amount;
-        String tax = String.valueOf(tax_amount);
-        String dis_amount = " ";
-        if (!txtFiledDiscountAmount.getText().isEmpty())
-            dis_amount = txtFiledDiscountAmount.getText();
         JSONObject jsonObject = new JSONObject();
-        try {
-            itemList = new JSONObject(list);
-            jsonObject.put("customer_id",customer_id);
-            jsonObject.put("net_amount",txtNetAmount.getText().trim());
-            jsonObject.put("tax_amount",tax);
-            jsonObject.put("gross_amount",txtFileldGross.getText().trim());
-            jsonObject.put("payment_method",method);
-            jsonObject.put("item_list",itemList);
-            jsonObject.put("discount_amount",dis_amount);
-            jsonObject.put("table_no",getFrom);
-        } catch (JSONException e) {
-            e.printStackTrace();
+        retrofitService = RetrofitClient.getClient().create(APIService.class);
+
+        if (from.equals("offline"))
+        {
+            ArrayList listArray = new ArrayList();
+            for (int j = 0; j < offlineModeList.size(); j++) {
+                BillingSaveModel billingSaveModel = offlineModeList.get(j);
+                String billItem = billingSaveModel.getItem_id() + ":" + billingSaveModel.getQty();
+                listArray.add(billItem);
+            }
+            String list = listArray.toString();
+            list = list.substring(1, list.length() - 1);
+            list = "{" + list + "}";
+            System.out.println(list);
+            BillingSaveModel billingSaveModel = offlineModeList.get(0);
+            JSONObject itemList = null;
+            try {
+                itemList = new JSONObject(list);
+                jsonObject.put("customer_id","");
+                jsonObject.put("customer_name",loginRequestAndResponse.getName());
+                jsonObject.put("customer_phone",loginRequestAndResponse.getMobile_num());
+                jsonObject.put("customer_email",loginRequestAndResponse.getCustomer_email());
+                jsonObject.put("customer_address",loginRequestAndResponse.getCustomer_address());
+                jsonObject.put("item_list",itemList);
+                jsonObject.put("net_amount",billingSaveModel.getNet_amt());
+                jsonObject.put("tax_amount",billingSaveModel.getTax_amt());
+                jsonObject.put("gross_amount",billingSaveModel.getGross_amt());
+                jsonObject.put("table_no",billingSaveModel.getTable_no());
+                jsonObject.put("payment_method",billingSaveModel.getPayment_method());
+                jsonObject.put("discount_amount",billingSaveModel.getDiscount_amt());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            Call<RequestAndResponseModel> placeOrder = retrofitService.placeOrder(jsonObject);
+            placeOrder.enqueue(new Callback<RequestAndResponseModel>() {
+                @Override
+                public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+                    itemLoadProgres.setVisible(false);
+                    if (response.isSuccessful())
+                    {
+                        RequestAndResponseModel requestAndResponseModel = response.body();
+                        System.out.println("order id----->"+requestAndResponseModel.getOrder_id());
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
+
+                }
+            });
+        }else {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Confirmation Dialog");
+            alert.setHeaderText("Look, a Confirmation Dialog");
+            alert.setContentText("Are you want place this order ?");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK){
+
+
+            String payment_method = String.valueOf(comboPaymentMethod.getSelectionModel().getSelectedItem());
+            String method = "";
+            if (payment_method.equals("Cash")) {
+                method = "1";
+            } else if (payment_method.equals("Card")) {
+                method = "2";
+            } else if (payment_method.equals("Paytm")) {
+                method = "3";
+            } else if (payment_method.equals("Others")) {
+                method = "4";
+            }
+            ArrayList listArray = new ArrayList();
+            for (int j = 0; j < modelObservableList.size(); j++) {
+                BillingModel billingModel = modelObservableList.get(j);
+                String billItem = billingModel.getItem_id() + ":" + billingModel.getQuantity();
+                listArray.add(billItem);
+            }
+            String list = listArray.toString();
+            list = list.substring(1, list.length() - 1);
+            list = "{" + list + "}";
+            JSONObject itemList = null;
+
+            String getFrom;
+            if (from.equals("parcel")) {
+                getFrom = "Parcel";
+            } else {
+                getFrom = selectedTable;
+            }
+            double total_amount = Double.parseDouble(txtTotal.getText());
+            double gross_amount = Double.parseDouble(txtFileldGross.getText());
+            double tax_amount = total_amount - gross_amount;
+            String tax = String.valueOf(tax_amount);
+            String dis_amount = " ";
+            if (!txtFiledDiscountAmount.getText().isEmpty())
+                dis_amount = txtFiledDiscountAmount.getText();
+            try {
+                itemList = new JSONObject(list);
+                jsonObject.put("customer_id", customer_id);
+                jsonObject.put("net_amount", txtNetAmount.getText().trim());
+                jsonObject.put("tax_amount", tax);
+                jsonObject.put("gross_amount", txtFileldGross.getText().trim());
+                jsonObject.put("payment_method", method);
+                jsonObject.put("item_list", itemList);
+                jsonObject.put("discount_amount", dis_amount);
+                jsonObject.put("table_no", getFrom);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+                Call<RequestAndResponseModel> placeOrder = retrofitService.placeOrder(jsonObject);
+                placeOrder.enqueue(new Callback<RequestAndResponseModel>() {
+                    @Override
+                    public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+                        itemLoadProgres.setVisible(false);
+                        if (response.isSuccessful())
+                        {
+                            RequestAndResponseModel requestAndResponseModel = response.body();
+                            if (requestAndResponseModel.getSuccessCode().equals(Constants.Success))
+                            {
+                                tableBill.setEditable(false);
+                                FileInputStream input = null;
+
+                                    try {
+                                        input = new FileInputStream("src/RestarantApp/images/closesale.png");
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    }
+                                Image image = new Image(input);
+                                imgPlaceOrder.setImage(image);
+                                btnAddItem.setOnMouseClicked(null);
+
+
+                            }
+                            System.out.println("order id----->"+requestAndResponseModel.getOrder_id());
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
+
+                    }
+                });
+
+            } else {
+                alert.close();
+            }
         }
-        Call<RequestAndResponseModel> placeOrder = retrofitService.placeOrder(jsonObject);
-       placeOrder.enqueue(new Callback<RequestAndResponseModel>() {
-           @Override
-           public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
-               itemLoadProgres.setVisible(false);
-               if (response.isSuccessful())
-               {
-                   RequestAndResponseModel requestAndResponseModel = response.body();
-                   System.out.println(requestAndResponseModel.getOrder_id());
-               }
-           }
 
-           @Override
-           public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
-
-           }
-       });
     }
 
 
@@ -1262,14 +1440,15 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     public void insertIntoDb()
     {
-        /*if (sqliteConnection != null)
+        if (sqliteConnection != null)
         {
           int tableCount =  sqliteConnection.tableCount();
+          LoginRequestAndResponse loginRequestAndResponse = LoginRequestAndResponse.getInstance();
             if (tableCount == 0) {
-                sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount);
+                sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount,loginRequestAndResponse.getMobile_num(),loginRequestAndResponse.getName(),loginRequestAndResponse.getCustomer_email(),loginRequestAndResponse.getCustomer_address());
             }else
             {
-                sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount);
+                sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount,loginRequestAndResponse.getMobile_num(),loginRequestAndResponse.getName(),loginRequestAndResponse.getCustomer_email(),loginRequestAndResponse.getCustomer_address());
             }
             System.out.println(   sqliteConnection.getLastRow());
             for (int i =0 ; i < modelObservableList.size() ; i++)
@@ -1300,8 +1479,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             {
                 getFrom = selectedTable;
             }
-            double total_amount = Double.parseDouble(txtTotalAmount.getText());
-            double gross_amount = Double.parseDouble(txtFileldGross.getText());
+            double total_amount = Double.parseDouble(txtTotal.getText().trim());
+            double gross_amount = Double.parseDouble(txtFileldGross.getText().trim());
             double tax_amount = total_amount - gross_amount;
             String tax = String.valueOf(tax_amount);
             String dis_amount = " ";
@@ -1313,38 +1492,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
 
-        }*/
-
-        ArrayList<BillingSaveModel>billingSaveModels = sqliteConnection.getAllData();
-        ArrayList<Integer> orderID = new ArrayList();
-        for (int i = 0 ; i <billingSaveModels.size();i++)
-        {
-            BillingSaveModel billingSaveModel = billingSaveModels.get(i);
-            int order_id = billingSaveModel.getOreder_id();
-            if (!orderID.contains(order_id))
-            {
-                orderID.add(order_id);
-            }
         }
 
-        for (int j = 0 ; j < orderID.size();j++)
-        {
-            int order_id = orderID.get(j);
-            for (int i = 0 ; i < billingSaveModels.size();i++)
-            {
-                BillingSaveModel billingSaveModel = billingSaveModels.get(i);
-                if (order_id == billingSaveModel.getOreder_id())
-                {
-                    System.out.println("bill"+order_id +"---->"+billingSaveModel.getItem_id() +" qty--->"+billingSaveModel.getQty());
-                }
-            }
-
-        }
-
-        /*if (!isConnectedNetwork)
-        {
-
-        }
-*/
     }
 }

@@ -21,10 +21,10 @@ public class SqliteConnection {
             return null;
         }
     }
-    public void insertDataToOrderMaster(int Order_no,String customer_id,int count)
+    public void insertDataToOrderMaster(int Order_no,String customer_id,int count,String mobile_num,String customer_name,String customer_email,String address)
     {
-        String query = "INSERT INTO ORDER_MASTER (ORDER_NO,CUSTOMER_ID) VALUES (?,?)";
-        String query1 = "INSERT INTO ORDER_MASTER (CUSTOMER_ID) VALUES (?)";
+        String query = "INSERT INTO ORDER_MASTER (ORDER_NO,CUSTOMER_ID,MOBILE_NUM,CUSTOMER_NAME,CUSTOMER_EMAIL,CUSTOMER_ADDRESS) VALUES (?,?,?,?,?,?)";
+        String query1 = "INSERT INTO ORDER_MASTER (CUSTOMER_ID,MOBILE_NUM,CUSTOMER_NAME,CUSTOMER_EMAIL,CUSTOMER_ADDRESS) VALUES (?,?,?,?,?)";
         preparedStatement = null;
 
         try {
@@ -33,12 +33,20 @@ public class SqliteConnection {
                 preparedStatement = connector().prepareStatement(query);
                 preparedStatement.setInt(1, Order_no);
                 preparedStatement.setString(2, customer_id);
+                preparedStatement.setString(3, mobile_num);
+                preparedStatement.setString(4, customer_name);
+                preparedStatement.setString(5, customer_email);
+                preparedStatement.setString(6, address);
                 preparedStatement.execute();
                 preparedStatement.close();
             }else
             {
                 preparedStatement = connector().prepareStatement(query1);
                 preparedStatement.setString(1, customer_id);
+                preparedStatement.setString(2, mobile_num);
+                preparedStatement.setString(3, customer_name);
+                preparedStatement.setString(4, customer_email);
+                preparedStatement.setString(5, address);
                 preparedStatement.execute();
                 preparedStatement.close();
             }
@@ -107,10 +115,8 @@ public class SqliteConnection {
              rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 int numberOfRows = rs.getInt(1);
-                System.out.println("numberOfRows= " + numberOfRows);
                 count = numberOfRows;
             } else {
-                System.out.println("error: could not get the record counts");
             }
             preparedStatement.close();
             rs.close();
@@ -148,6 +154,7 @@ public class SqliteConnection {
     public ArrayList getAllData()
     {
         ArrayList<BillingSaveModel> getAllData = new ArrayList();
+        System.out.println("run");
 
         ResultSet rs;
         String query ="SELECT  ORDER_MASTER.ORDER_NO,ORDER_ITEM_MASTER.ITEM_ID,ORDER_ITEM_MASTER.QTY,ORDER_AMOUNT_MASTER.DISCOUNT_AMT,ORDER_AMOUNT_MASTER.TABLE_NO\n" +
@@ -185,6 +192,7 @@ public class SqliteConnection {
             }
             preparedStatement.close();
             rs.close();
+
         } catch (SQLException e) {
             System.out.println(e);
             e.printStackTrace();
@@ -193,4 +201,53 @@ public class SqliteConnection {
         return getAllData;
     }
 
+
+    public void deletOrderTable()
+    {
+        String query = "DELETE FROM ORDER_MASTER;";
+        preparedStatement = null;
+
+        try {
+
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.execute();
+            preparedStatement.close();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void deletOrderItemTable()
+    {
+        String query = "DELETE FROM ORDER_ITEM_MASTER;";
+        preparedStatement = null;
+
+        try {
+
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.execute();
+            preparedStatement.close();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public void deletOrderItemAountTable()
+    {
+        String query = "DELETE FROM ORDER_AMOUNT_MASTER;";
+        preparedStatement = null;
+
+        try {
+
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.execute();
+            preparedStatement.close();
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
