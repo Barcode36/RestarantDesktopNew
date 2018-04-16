@@ -168,14 +168,19 @@
                   </Label>
                   <TextField fx:id="txtTotalAmount" layoutX="166.0" layoutY="15.0" prefHeight="25.0" prefWidth="127.0" />
                   <ChoiceBox fx:id="comboPaymentMethod" layoutX="164.0" layoutY="303.0" prefHeight="25.0" prefWidth="127.0" />
-                  <ImageView fitHeight="30.0" fitWidth="90.0" layoutX="59.0" layoutY="344.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="30.0" fitWidth="90.0" layoutX="8.0" layoutY="343.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../images/printof.png" />
+                        <Image url="@../images/printbill.png" />
                      </image>
                   </ImageView>
-                  <ImageView fx:id="imgPlaceOrder" fitHeight="30.0" fitWidth="87.0" layoutX="168.0" layoutY="345.0" onMouseClicked="#btnCloseOrder" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="imgPlaceOrder" fitHeight="34.0" fitWidth="90.0" layoutX="199.0" layoutY="343.0" onMouseClicked="#btnCloseOrder" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/placeorder.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fx:id="printKot" onMouseClicked="#btnPrintKot" fitHeight="30.0" fitWidth="98.0" layoutX="105.0" layoutY="343.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/kot.png" />
                      </image>
                   </ImageView>
                </children>

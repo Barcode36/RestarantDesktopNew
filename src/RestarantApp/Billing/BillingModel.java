@@ -4,8 +4,9 @@ public class BillingModel {
 
     int s_no;
     String item_name,quantity,rate,amount,item_id,customer_id,from;
+    boolean isPlacedSale;
 
-    public BillingModel(int s_no,String item_name,String quantity,String rate,String amount,String item_id,String customer_id,String from)
+    public BillingModel(int s_no,String item_name,String quantity,String rate,String amount,String item_id,String customer_id,String from,boolean isPlacedSale)
     {
         this.s_no = s_no;
         this.item_name = item_name;
@@ -15,8 +16,16 @@ public class BillingModel {
          this.item_id = item_id;
          this.from = from;
          this.customer_id = customer_id;
+         this.isPlacedSale = isPlacedSale;
     }
 
+    public boolean isPlacedSale() {
+        return isPlacedSale;
+    }
+
+    public void setPlacedSale(boolean placedSale) {
+        isPlacedSale = placedSale;
+    }
 
     public void setFrom(String from) {
         this.from = from;
