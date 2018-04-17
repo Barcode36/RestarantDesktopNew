@@ -4,6 +4,7 @@ import RestarantApp.Network.APIService;
 import RestarantApp.Network.NetworkChangeListener;
 import RestarantApp.Network.NetworkConnection;
 import RestarantApp.Network.RetrofitClient;
+import RestarantApp.PrinterClass.Util;
 import RestarantApp.aaditionalClass.AutoCompleteTextField;
 import RestarantApp.aaditionalClass.EditingCell;
 import RestarantApp.aaditionalClass.UtilsClass;
@@ -17,11 +18,16 @@ import RestarantApp.model.ItemListRequestAndResponseModel;
 import RestarantApp.model.LoginRequestAndResponse;
 import RestarantApp.model.RequestAndResponseModel;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -37,6 +43,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -112,6 +119,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     boolean isPlacedOrder = true;
     Connection connection;
     SqliteConnection sqliteConnection;
+    ObservableList<Integer> selectedCheckedItems = FXCollections.observableArrayList();
+
     Alert alert;
     @FXML
     ImageView imgConectionStatus,imgPlaceOrder,btnAddItem;
@@ -213,6 +222,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     }else
                     {
                         modelObservableList = FXCollections.observableArrayList();
+                        selectedCheckedItems = FXCollections.observableArrayList();
                         tableBill.setItems(modelObservableList);
                         itemIdList = new ArrayList<>();
                         setIsPlaced();
@@ -389,7 +399,36 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         tableBill.getStylesheets().add("/RestarantApp/cssFile/Login.css");
         tableBill.setFixedCellSize(35);
 
+        TableColumn<BillingModel, Integer> selectedCol = new TableColumn<>();
+        selectedCol.setCellValueFactory(new PropertyValueFactory<BillingModel,Integer>("s_no"));
 
+        selectedCol.setCellFactory((TableColumn<BillingModel, Integer> col) -> {
+            BooleanProperty selected = new SimpleBooleanProperty();
+            CheckBoxTableCell<BillingModel, Integer> cell = new CheckBoxTableCell<>(index -> selected);
+            selected.addListener((obs, wasSelected, isNowSelected) -> {
+                BillingModel billingModel = modelObservableList.get(cell.getIndex());
+                if (isNowSelected) {
+                    selectedCheckedItems.add(cell.getItem());
+                    billingModel.setSendKot(true);
+                } else {
+                    selectedCheckedItems.remove(cell.getItem());
+                    billingModel.setSendKot(false);
+                }
+            });
+
+            //f update check box when cell is reused for a diferent index:
+            cell.itemProperty().addListener((obs, oldItem, newItem) -> {
+//                selected.set(newItem != null && selectedCheckedItems.contains(newItem));
+            });
+
+
+
+            return cell ;
+        });
+
+        selectedCol.setMinWidth(10);
+        selectedCol.setPrefWidth( 25 );
+        tableBill.getColumns().add(0, selectedCol);
 
         TableColumn<BillingModel, BillingModel> unfriendCol = new TableColumn<>("Action");
         unfriendCol.setMinWidth(40);
@@ -530,7 +569,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                     amt = amt * price;
                                     String amount = String.valueOf(amt);
                                     serialNo = billingModelList.getS_no();
-                                     billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), String.valueOf(newQty), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false);
+                                     billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), String.valueOf(newQty), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false,false);
                                     modelObservableList.set(j, billingModel);
                                     setSubTotal();
                                 }
@@ -540,7 +579,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             double price = Double.valueOf(selectedItem.getPrice());
                             amt = amt * price;
                             String amount = String.valueOf(amt);
-                             billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false);
+                             billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false,false);
                             modelObservableList.add(billingModel);
                             tableBill.setItems(modelObservableList);
                             itemIdList.add(Integer.parseInt(selectedItem.getShort_code()));
@@ -551,7 +590,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         double price = Double.valueOf(selectedItem.getPrice());
                         amt = amt * price;
                         String amount = String.valueOf(amt);
-                        billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false);
+                        billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false,false);
                         modelObservableList.add(billingModel);
                         tableBill.setItems(modelObservableList);
                         itemIdList.add(Integer.parseInt(selectedItem.getShort_code()));
@@ -1006,7 +1045,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                             double price = Double.valueOf(rate);
                                             amt = amt * price;
                                             String amount = String.valueOf(amt);
-                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode,customer_id_from,"mobile",false);
+                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode,customer_id_from,"mobile",false,false);
                                             modelObservableList.add(billingModel);
                                             /*Platform.runLater(new Runnable() {
                                                 @Override
@@ -1061,7 +1100,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                             amt = amt * price;
                                             String amount = String.valueOf(amt);
                                             from = "mobile";
-                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode,customer_id_from,from,false);
+                                            BillingModel billingModel = new BillingModel(serialNo, item_name, qty, rate, amount, shortCode,customer_id_from,from,false,false);
                                             modelObservableList.add(billingModel);
                                         }
                                         tableListValue.put(table, modelObservableList);
@@ -1588,11 +1627,42 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 "       **** Prawn And Crab ****       \n\n"
                +"                  KOT                 \n\n"
                +" KOT No:                 Date:"+currentDate+"\n"
-               +" Table No:               Time:"+currentTime +"\n";
+               +" Table No:               Time:"+currentTime +"\n\n";
 
 
-        String  listItem = "       List Of Items    ";
-        header = header+ "\n\n\n\n\n\n\n";
+        String  listItem = "            List Of Items            \n"
+                          +"            -------------             \n";
+
+        String item_header = "  S.No         Item Name        Qty\n\n";
+        final String[] item = {""};
+        final int[] totalQty = {0};
+        final int[] ssNo = {0};
+        if (modelObservableList.size() != 0)
+        {
+            for (int i = 0; i<modelObservableList.size();i++)
+            {
+
+                BillingModel billingModel = modelObservableList.get(i);
+                String item_name = billingModel.getItem_name();
+                String qty = billingModel.getQuantity();
+
+                int sno = billingModel.getS_no();
+                int finalI = i;
+                selectedCheckedItems.forEach(s -> {
+                    if (sno == s)
+                    {
+                        ssNo[0] = ssNo[0] + 1;
+                        totalQty[0] = totalQty[0] + Integer.parseInt(qty);
+                        item[0] = item[0] +"   "+ ssNo[0] + "        "+item_name + "          "+qty+"\n";
+                        billingModel.setSendKot(true);
+                    }
+                });
+
+            }
+        }
+        String line = " ------------------------------------\n";
+        String total_item = "                     Total Item  "+ totalQty[0];
+        header = header+listItem+item_header+ item[0] +line+total_item+"\n\n\n\n\n\n\n";
         PrinterService printerService = new PrinterService();
         //print some stuff
         printerService.printString("RP3150 STAR(U) 1",header);
@@ -1604,5 +1674,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
     }
+
 
 }

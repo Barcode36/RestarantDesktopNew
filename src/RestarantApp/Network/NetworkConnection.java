@@ -87,6 +87,10 @@ public class NetworkConnection {
                             networkChangeListener.Networkchanged(false);
                             isConnected = false;
 
+                        }catch (IOException e)
+                        {
+                            networkChangeListener.Networkchanged(false);
+                            isConnected = false;
                         }
 
                     } catch (IOException e) {
