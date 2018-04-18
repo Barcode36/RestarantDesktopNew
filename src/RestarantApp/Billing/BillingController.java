@@ -135,7 +135,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                  {
                                 System.out.println("Connection  successfull");
             sqliteConnection = new SqliteConnection();
-                                }
+
+            }
             }
         });
         t.start();
@@ -1767,7 +1768,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         if (list.getActive().equals("1"))
                         {
                             int status = Integer.parseInt(list.getActive());
-                            System.out.println("check database---->"+sqliteConnection.checkDatabase(list.getName()));
+                            System.out.println("check database---->"+list.getName());
                            if (sqliteConnection.checkDatabase(list.getName() ) == 0)
                            {
                                sqliteConnection.insertTableData(list.getName(),status);

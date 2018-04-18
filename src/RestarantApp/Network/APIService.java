@@ -1,5 +1,6 @@
 package RestarantApp.Network;
 
+import RestarantApp.model.CustomerDetails;
 import RestarantApp.model.ItemListRequestAndResponseModel;
 import RestarantApp.model.LoginRequestAndResponse;
 import RestarantApp.model.RequestAndResponseModel;
@@ -106,5 +107,9 @@ public interface APIService {
     @FormUrlEncoded
     @POST("place_order.php")
     Call<RequestAndResponseModel> placeOrder(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("client_details_by_phone.php")
+    Call<CustomerDetails> searchNumber(@Field("x") JSONObject object);
 
 }

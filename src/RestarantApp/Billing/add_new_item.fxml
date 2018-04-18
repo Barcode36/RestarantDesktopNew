@@ -71,6 +71,7 @@
                   <Font name="Times New Roman Bold" size="14.0" />
                </font>
             </Label>
+            <Button fx:id="btnSearch" layoutX="424.0" layoutY="98.0" mnemonicParsing="false" onAction="#btnSearchNumber" text="Search" />
             </children>
          <stylesheets>
             <URL value="@../cssFile/Login.css" />
