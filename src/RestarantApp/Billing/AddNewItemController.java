@@ -1,11 +1,17 @@
 package RestarantApp.Billing;
 
 import RestarantApp.Network.*;
+import RestarantApp.database.SqliteConnection;
 import RestarantApp.model.LoginRequestAndResponse;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -18,6 +24,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class AddNewItemController  implements Initializable,NetworkChangeListener {
@@ -30,7 +37,10 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
     public static AddNewItemListener addNewItemListener;
     boolean isConnectedNetwork;
     @FXML
+    ChoiceBox selectTable;
+    @FXML
     TextArea txtAddress;
+    ObservableList listTable = FXCollections.observableArrayList();
     public void setAddItemListener(AddNewItemListener addItemListener)
     {
         this.addNewItemListener = addItemListener;
@@ -67,11 +77,13 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                         if (loginRequestAndResponse.getCustomer_id() != null) {
                             LoginRequestAndResponse customer_id = LoginRequestAndResponse.getInstance();
                             customer_id.setCustomer_id(loginRequestAndResponse.getCustomer_id());
-                            if (txtName.getText().isEmpty()) {
+                           /* if (txtName.getText().isEmpty()) {
                                 customer_id.setName("Parcel");
                             } else {
                                 customer_id.setName(txtName.getText());
-                            }
+                            }*/
+
+                            customer_id.setName(String.valueOf(selectTable.getSelectionModel().getSelectedItem()));
                             customer_id.setMobile_num(txtMobileNumber.getText());
                             customer_id.setCustomer_address( " ");
                             customer_id.setCustomer_email(txtMailId.getText());
@@ -132,9 +144,15 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         NetworkConnection networkConnection = new NetworkConnection(AddNewItemController.this);
-
+        listTable.add("Parcel");
+        SqliteConnection sqliteConnection = new SqliteConnection();
+        listTable.addAll(sqliteConnection.getAllTableData());
+        selectTable.setItems(listTable);
+        selectTable.getSelectionModel().selectFirst();
 //        isConnectedNetwork =  networkConnection.isInternetReachable();
     }
+
+
 
     @Override
     public void Networkchanged(boolean isConnected) {

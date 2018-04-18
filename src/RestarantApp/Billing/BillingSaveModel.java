@@ -1,8 +1,23 @@
 package RestarantApp.Billing;
 
+import java.util.HashMap;
+
 public class BillingSaveModel {
     int oreder_id;
     String item_id,qty,discount_amt,table_no,net_amt,gross_amt,tax_amt,payment_method;
+    HashMap<String,Boolean> getSetKot = new HashMap<>();
+    private static BillingSaveModel ourInstance = new BillingSaveModel();
+    public static BillingSaveModel getInstance() {
+        return ourInstance;
+    }
+
+    public HashMap<String, Boolean> getGetSetKot() {
+        return getSetKot;
+    }
+
+    public void setGetSetKot(HashMap<String, Boolean> getSetKot) {
+        this.getSetKot = getSetKot;
+    }
 
     public int getOreder_id() {
         return oreder_id;

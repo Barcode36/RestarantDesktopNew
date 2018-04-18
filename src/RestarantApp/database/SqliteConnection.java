@@ -77,6 +77,102 @@ public class SqliteConnection {
 
     }
 
+    public void insertTableData(String tableName,int status)
+    {
+        String query = "INSERT INTO TABLE_MASTER(TABLE_NAME, STATUS) VALUES (?,?)";
+        preparedStatement = null;
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.setString(1,tableName);
+            preparedStatement.setInt(2,status);
+            preparedStatement.execute();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int checkDatabase(String tableName)
+    {
+         int count = 0;
+         String queryCheck = "SELECT count(*) from TABLE_MASTER WHERE TABLE_NAME = ?";
+        preparedStatement = null;
+        try {
+            preparedStatement = connector().prepareStatement(queryCheck);
+            preparedStatement.setString(1, tableName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                count = resultSet.getInt(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return count;
+
+    }
+
+    public int getTableStatus(String tableName)
+    {
+        int status = 0 ;
+        String query = "SELECT * FROM TABLE_MASTER WHERE TABLE_NAME = ?";
+        preparedStatement = null;
+
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.setString(1, tableName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                status = resultSet.getInt(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return status;
+    }
+
+    public void updateTableStatus(String tableName,int status)
+    {
+        preparedStatement = null;
+        String query = "UPDATE TABLE_MASTER SET STATUS = ? WHERE TABLE_NAME = ?";
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.setString(1, tableName);
+            preparedStatement.setInt(2, status);
+            preparedStatement.executeUpdate();
+
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public ArrayList getAllTableData()
+    {
+        ArrayList getData = new ArrayList();
+        String query = "SELECT TABLE_NAME FROM TABLE_MASTER";
+        ResultSet rs = null;
+
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            rs = preparedStatement.executeQuery();
+            while (rs.next())
+            {
+                getData.add(rs.getString(1));
+            }
+            preparedStatement.close();
+            rs.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return getData;
+    }
     public void insertDataToOrderAmountMaster(int Order_no,String table_number,String net_amt,String tax_amt,String gross_amt,String discount_amt,String payment_method)
     {
         String query = "INSERT INTO ORDER_AMOUNT_MASTER (ORDER_ID,TABLE_NO,NET_AMT,TAX_AMT,GROSS_AMT,DISCOUNT_AMT,PAYMENT_METHOD) VALUES (?,?,?,?,?,?,?)";
