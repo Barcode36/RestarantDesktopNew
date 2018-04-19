@@ -7,6 +7,15 @@ public class RequestAndResponseModel {
     String status_code, status_message, success,Status_code,Success,Status_message,Order_id;
     int tot_cats;
     ArrayList<cat_list> cat_list = new ArrayList<>();
+    ArrayList<variety_id_list> Variety_id_list = new ArrayList<>();
+
+    public ArrayList<RequestAndResponseModel.variety_id_list> getVariety_id_list() {
+        return Variety_id_list;
+    }
+
+    public void setVariety_id_list(ArrayList<RequestAndResponseModel.variety_id_list> variety_id_list) {
+        Variety_id_list = variety_id_list;
+    }
 
     public String getOrder_id() {
         return Order_id;
@@ -178,6 +187,27 @@ public class RequestAndResponseModel {
 
         public void setCat_name(String cat_name) {
             Cat_name = cat_name;
+        }
+    }
+
+    public class variety_id_list
+    {
+        String Variety_id, Variety_name;
+
+        public String getVariety_id() {
+            return Variety_id;
+        }
+
+        public void setVariety_id(String variety_id) {
+            Variety_id = variety_id;
+        }
+
+        public String getVariety_name() {
+            return Variety_name;
+        }
+
+        public void setVariety_name(String variety_name) {
+            Variety_name = variety_name;
         }
     }
 }

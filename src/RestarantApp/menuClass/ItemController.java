@@ -37,6 +37,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -45,13 +46,14 @@ import java.util.logging.Logger;
 public class ItemController {
 
     @FXML
-    CheckComboBox checkCombo;
+    CheckComboBox checkCombo,verietyCombo;
     private int i = 0;
 
     JFXSnackbar jfxSnackbar;
     @FXML
     StackPane catRootPane;
     ArrayList<RequestAndResponseModel.cat_list> cat_listArrayList;
+    ArrayList<RequestAndResponseModel.variety_id_list> variety_listArrayList;
     String outputImage;
     BufferedImage bufferedImage;
     @FXML
@@ -59,6 +61,7 @@ public class ItemController {
     @FXML
     TextField txtItem,itemDes,txtPrice,txtItemId;
     ArrayList itemId = new ArrayList();
+    ArrayList varietyId = new ArrayList();
 
     public void initialize() {
         String css = ViewCategoryController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
@@ -74,15 +77,21 @@ public class ItemController {
             }
         });
         getData();
+        getVarietyList();
         imgUpload.addEventHandler(javafx.scene.input.MouseEvent.MOUSE_CLICKED, new EventHandler<javafx.scene.input.MouseEvent>() {
             @Override
             public void handle(javafx.scene.input.MouseEvent event) {
                 try {
-
-                    bufferedImage = ImageIO.read(UtilsClass.selectImage());
-                    if (bufferedImage != null){
-                        Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                        imgItemIamge.setImage(image);
+                    File file = UtilsClass.selectImage();
+                    double bytes = file.length();
+                    double kilobytes = (bytes / 1024);
+                    System.out.println("file size-->"+String.valueOf(kilobytes));
+                    if (kilobytes < 250) {
+                        bufferedImage = ImageIO.read(file);
+                        if (bufferedImage != null) {
+                            Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+                            imgItemIamge.setImage(image);
+                        }
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(CategoryController.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,6 +111,46 @@ public class ItemController {
 
     }
 
+    private void getVarietyList() {
+
+        APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
+
+        Call<RequestAndResponseModel> call = retrofitClient.listVaiety();
+        call.enqueue(new Callback<RequestAndResponseModel>() {
+            @Override
+            public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+                if (response.isSuccessful()) {
+                    RequestAndResponseModel requestAndResponseModel = response.body();
+                    if (requestAndResponseModel.getSuccessCode().equals(Constants.Success)) {
+                        variety_listArrayList = requestAndResponseModel.getVariety_id_list();
+
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                setVarietyPane();
+                            }
+                        });
+
+
+                    }else
+                    {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                jfxSnackbar.show(requestAndResponseModel.getStatus_message(),5000);
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
+                System.out.println(throwable.getMessage());
+            }
+        });
+    }
+
 
     public void btnUploadAction(ActionEvent actionEvent) {
 
@@ -111,7 +160,10 @@ public class ItemController {
     public void btnAddCategory(ActionEvent actionEvent) {
 
         ObservableList getIndex =  checkCombo.getCheckModel().getCheckedIndices();
+        ObservableList getVareityIndex =  verietyCombo.getCheckModel().getCheckedIndices();
+
         ArrayList checkItem = new ArrayList();
+        ArrayList checkVarityItem = new ArrayList();
         for (int i=1;i<getIndex.size();i++)
         {
             int index = (int) getIndex.get(i);
@@ -120,13 +172,23 @@ public class ItemController {
             checkItem.add(itemId.get(index));
         }
 
+        for (int i=1;i<getVareityIndex.size();i++)
+        {
+            int index = (int) getVareityIndex.get(i);
 
-        sendItemDetails(checkItem);
+
+            checkVarityItem.add(varietyId.get(index));
+        }
+
+
+
+        sendItemDetails(checkItem,checkVarityItem);
     }
 
-    private void sendItemDetails(ArrayList checkItem) {
+    private void sendItemDetails(ArrayList checkItem,ArrayList variety_listArrayList) {
 
         ArrayList itemList = new ArrayList();
+        ArrayList vareityArrayList = new ArrayList();
         for(int j= 0 ; j < checkItem.size() ; j ++)
         {
             String item = String.valueOf(j) +":" +checkItem.get(j);
@@ -137,22 +199,35 @@ public class ItemController {
         list = list.substring(1, list.length()-1);
         list = "{"+list+"}";
 
+
+        for(int j= 0 ; j < variety_listArrayList.size() ; j ++)
+        {
+            String item = String.valueOf(j) +":" +variety_listArrayList.get(j);
+            vareityArrayList.add(item);
+
+        }
+        String varietyList = vareityArrayList.toString();
+        varietyList = varietyList.substring(1, varietyList.length()-1);
+        varietyList = "{"+varietyList+"}";
+
         APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
         JSONObject jsonObject = new JSONObject();
         outputImage = UtilsClass.encodeToString(bufferedImage,"png");
         try {
             JSONObject item = new JSONObject(list);
+            JSONObject varietyItem = new JSONObject(varietyList);
             jsonObject.put("item_name",txtItem.getText());
             jsonObject.put("short_code",txtItemId.getText());
             jsonObject.put("item_desc",itemDes.getText());
             jsonObject.put( "item_image",outputImage);
             jsonObject.put("item_price",txtPrice.getText());
             jsonObject.put("item_cat_list",item);
+            jsonObject.put("item_variety_list",varietyItem);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Call<RequestAndResponseModel> call = retrofitClient.sendItemDetails(jsonObject);
-        call.enqueue(new Callback<RequestAndResponseModel>() {
+        Call<RequestAndResponseModel> addItemcall = retrofitClient.sendItemDetails(jsonObject);
+        addItemcall.enqueue(new Callback<RequestAndResponseModel>() {
             @Override
             public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
                 
@@ -180,6 +255,8 @@ public class ItemController {
                                     txtPrice.setText("");
                                     imgItemIamge.setImage(null);
                                     checkCombo.getCheckModel().check(0);
+                                    txtItemId.setText("");
+                                    verietyCombo.getCheckModel().check(0);
                                 }
                             });
 
@@ -256,6 +333,32 @@ public class ItemController {
             public void onChanged(ListChangeListener.Change<? extends String> c) {
 
                 System.out.println(checkCombo.getCheckModel().getCheckedItems());
+            }
+        });
+
+
+
+    }
+
+    private void setVarietyPane() {
+
+        verietyCombo.getItems().add("Select Variety");
+        varietyId.add("-1");
+
+        for (int i=0;i<variety_listArrayList.size();i++)
+        {
+            RequestAndResponseModel.variety_id_list cat_list = variety_listArrayList.get(i);
+            verietyCombo.getItems().add(cat_list.getVariety_name());
+            varietyId.add(cat_list.getVariety_id());
+            System.out.println(cat_list.getVariety_name());
+        }
+
+        verietyCombo.getCheckModel().check(0);
+
+        verietyCombo.getCheckModel().getCheckedItems().addListener(new ListChangeListener<String>() {
+            public void onChanged(ListChangeListener.Change<? extends String> c) {
+
+                System.out.println(verietyCombo.getCheckModel().getCheckedItems());
             }
         });
 

@@ -21,6 +21,21 @@ public interface APIService {
     Call<RequestAndResponseModel> sendCategoryDetails(@Field("x") JSONObject object);
 
     @FormUrlEncoded
+    @POST("veraity_add.php")
+    Call<RequestAndResponseModel> sendVarityDetails(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("veraity_view.php")
+    Call<RequestAndResponseModel> viewVariety(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("veraity_delete.php")
+    Call<RequestAndResponseModel> deleteVaiety(@Field("x") JSONObject object);
+
+    @POST("veraity_list.php")
+    Call<RequestAndResponseModel> listVaiety();
+
+    @FormUrlEncoded
     @POST("category_view.php")
     Call<RequestAndResponseModel> viewCategory(@Field("x") JSONObject object);
 

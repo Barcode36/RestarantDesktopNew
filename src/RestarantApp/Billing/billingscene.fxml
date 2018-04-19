@@ -168,7 +168,7 @@
                   </Label>
                   <TextField fx:id="txtTotalAmount" layoutX="166.0" layoutY="15.0" prefHeight="25.0" prefWidth="127.0" />
                   <ChoiceBox fx:id="comboPaymentMethod" layoutX="164.0" layoutY="303.0" prefHeight="25.0" prefWidth="127.0" />
-                  <ImageView fitHeight="30.0" fitWidth="90.0" layoutX="8.0" layoutY="343.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView onMouseClicked="#btnprintBill" fitHeight="30.0" fitWidth="90.0" layoutX="8.0" layoutY="343.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/printbill.png" />
                      </image>

@@ -10,13 +10,14 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
+
 <?import org.controlsfx.control.CheckComboBox?>
 
-<StackPane fx:id="catRootPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.menuClass.ItemController">
+<StackPane fx:id="catRootPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.menuClass.ItemController">
     <children>
-        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="425.0" prefWidth="650.0" style="-fx-background-color: f68220; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
+        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="505.0" prefWidth="650.0" style="-fx-background-color: f68220; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
             <children>
-                <Label alignment="CENTER" layoutX="149.0" layoutY="154.0" text="Item :" textFill="WHITE">
+                <Label alignment="CENTER" layoutX="108.0" layoutY="154.0" text="Item  Name:" textFill="WHITE">
                     <font>
                         <Font name="Times New Roman Bold" size="14.0" />
                     </font>
@@ -33,11 +34,11 @@
                         <Font name="Times New Roman Bold" size="14.0" />
                     </font>
                 </Label>
-                <Button layoutX="215.0" layoutY="371.0" mnemonicParsing="false" onAction="#btnAddCategory" prefHeight="28.0" prefWidth="69.0" style="-fx-background-color: #008ccd;" text="Submit" textFill="WHITE">
+                <Button layoutX="215.0" layoutY="431.0" mnemonicParsing="false" onAction="#btnAddCategory" prefHeight="28.0" prefWidth="69.0" style="-fx-background-color: #008ccd;" text="Submit" textFill="WHITE">
                <font>
                   <Font name="System Bold" size="12.0" />
                </font></Button>
-                <ImageView fx:id="imgItemIamge" fitHeight="231.0" fitWidth="212.0" layoutX="414.0" layoutY="97.0" pickOnBounds="true" preserveRatio="true" />
+                <ImageView fx:id="imgItemIamge" fitHeight="177.0" fitWidth="187.0" layoutX="426.0" layoutY="97.0" pickOnBounds="true" preserveRatio="true" />
                 <ProgressIndicator fx:id="progressCategory" layoutX="280.0" layoutY="227.0" progress="0.0" visible="false" />
             <Label layoutX="57.0" layoutY="324.0" text="Item  Category List :" textFill="WHITE">
                <font>
@@ -66,7 +67,20 @@
                   <Image url="@../images/additem.png" />
                </image>
             </ImageView>
-            <CheckComboBox fx:id="checkCombo" layoutX="209.0" layoutY="318.0" />
+            <Label layoutX="99.0" layoutY="369.0" text="Variety List :" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="14.0" />
+               </font>
+            </Label>
+            <CheckComboBox fx:id="verietyCombo" layoutX="205.0" layoutY="365.0" />
+           <CheckComboBox fx:id="checkCombo" layoutX="209.0" layoutY="318.0" />
+            <Label layoutX="298.0" layoutY="283.0" prefHeight="17.0" prefWidth="235.0" text="Choose your image file size below 250KB" textFill="WHITE">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+
+              <!--<CheckComboBox fx:id="varietyCombo" layoutX="379.0" layoutY="318.0" />-->
             </children>
         </AnchorPane>
     </children>

@@ -122,6 +122,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     @FXML
     ImageView imgConectionStatus,imgPlaceOrder,btnAddItem;
     BillingSaveModel billingSaveModel = BillingSaveModel.getInstance();
+    String tax1,tax2;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //database connecttivity
@@ -840,12 +841,12 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 if (response.isSuccessful()) {
                     RequestAndResponseModel requestAndResponseModel = response.body();
 
-
+                    HashMap<Integer,String> taxNAme = new HashMap<>();
                     for (int i=0;i < requestAndResponseModel.getList().size() ; i ++)
                     {
                         RequestAndResponseModel.list list = requestAndResponseModel.getList().get(i);
                         getTaxListDetails.put(Integer.valueOf(list.getId()),list.getValue());
-
+                        taxNAme.put(Integer.valueOf(list.getId()),list.getName());
                         if (list.getActive() == 1)
                         {
                             if (list.getComp1() != 0&& list.getComp2() != 0)
@@ -853,8 +854,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                 Integer comb1 = list.getComp1();
                                 Integer comb2 = list.getComp2();
                                 System.out.println("get combination--->"+getTaxListDetails.get(comb1));
-
-                                intTaxPrice = comb1+comb2;
+                                tax1 = getTaxListDetails.get(comb1)+"("+getTaxListDetails.get(comb1) + "%)";
+                                tax2 =  getTaxListDetails.get(comb1)+"("+getTaxListDetails.get(comb2) + "%)";
+                                intTaxPrice = getTaxListDetails.get(comb1)+getTaxListDetails.get(comb2);
                                 System.out.println("get combination--->"+intTaxPrice);
                                 txtGstPercent.setText(String.valueOf(intTaxPrice)+"%");
                                 txtGstPercent.setEditable(false);
@@ -1749,6 +1751,87 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
 
+    public void printBill()
+    {
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
+        //get current date time with Date()
+        Date date = new Date();
+        Date time = new Date();
+        String currentDate = dateFormat.format(date);
+        String currentTime = timeFormat.format(time);
+        String item = "";
+        int totalQty = 0;
+        int ssNo = 0;
+        String header =
+                "       **** Prawn And Crab ****       \n\n"
+                        +"                  KOT                 \n\n"
+                        +" GST NO:                               \n"
+                        +" Date:"+currentDate+"       Time:"+currentTime+"\n"
+                        +" Table No:                            \n\n";
+
+
+        String  listItem = "            List Of Items            \n"
+                +"            -------------             \n";
+
+        String item_header =String.format("%-18s %6s %7s %7s\n\n","Item Name","Qty","Rate","Amount");
+
+        for (int i = 0; i<modelObservableList.size();i++)
+        {
+
+            BillingModel billingModel = modelObservableList.get(i);
+            String item_name = billingModel.getItem_name();
+            String qty = billingModel.getQuantity();
+
+
+                ssNo = ssNo + 1;
+                totalQty = totalQty + Integer.parseInt(qty);
+                String rate = billingModel.getRate();
+                String amount = billingModel.getAmount();
+
+                 item =item + String.format("%-18s %5s %7s %7s\n", item_name, qty, rate,amount);
+
+//                item = item +" "+ ssNo +"   "+item_name + "       "+qty+"    "+rate+"    "+amount+"\n";
+                billingModel.setSendKot(true);
+
+
+
+        }
+        String line = "------------------------------------------";
+        String subTotal=String.format("%32s : %5s\n","Sub Total",txtTotalAmount.getText());
+        String percentage=String.format("%26s(%2s%%): %1s\n","Discount",txtFiledDiscount.getText(),txtFiledDiscountAmount.getText());
+        String netTotal = String.format("%32s : %2s\n","Net Total",txtFileldGross.getText());
+        String cgst = String.format("%32s : %2s\n",tax1,txtFileldGross.getText());
+        String scgst = String.format("%32s : %2s\n",tax2,txtFileldGross.getText());
+        String line1 = String.format("%40s\n","--------------------");
+        String grantTotl = String.format("%32s : %5s\n","Grand Total",txtTotal.getText());
+        if (!txtFiledDiscountAmount.getText().isEmpty()) {
+            header = header + listItem + item_header + item + line + subTotal + percentage + netTotal+cgst+scgst+line1+grantTotl+"\n\n\n\n\n\n\n";
+        }else
+        {
+            header = header + listItem + item_header + item + line + subTotal  + netTotal+cgst+scgst+line1+grantTotl+"\n\n\n\n\n\n\n";
+        }
+
+        ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
+        dialog.setHeaderText("Choose the printer!");
+        dialog.setContentText("Choose a printer from available printers");
+        dialog.setTitle("Printer Choice");
+        PrinterService printerService = new PrinterService();
+
+        Optional<Printer> opt = dialog.showAndWait();
+        if (opt.isPresent()) {
+            Printer printer = opt.get();
+            //print some stuff
+            printerService.printString(printer.getName(),header);
+
+        }
+
+        // cut that paper!
+        byte[] cutP = new byte[] { 0x1d, 'V', 1 };
+
+        printerService.printBytes("RP3150 STAR(U) 1", cutP);
+
+    }
 
     private void getTableList() {
         APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
@@ -1797,4 +1880,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     }
 
+    public void btnprintBill(MouseEvent mouseEvent) {
+        printBill();
+    }
 }

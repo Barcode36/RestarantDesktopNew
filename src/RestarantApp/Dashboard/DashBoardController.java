@@ -36,7 +36,7 @@ public class DashBoardController  {
     TreeView lstMenu;
     @FXML
     AnchorPane subCategory,rootPane;
-    String root = "Root",monthly_report ="Monthly Report",category ="Category",item = "Items",add_category = "Add Category",view_category ="View Category"
+    String root = "Root",monthly_report ="Monthly Report",category ="Category",item = "Items",add_category = "Add Category",view_category ="View Category",variety ="Variety",add_varity = "Add variety",view_varity ="View variety"
             ,add_Item ="Add Item",list_item = "List Item",tax = "Tax",add_tax = "Add Tax",list_tax = "List Tax",combo = " Combo Items",add_combo = "Add Combo Items",
             combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table";
 
@@ -47,15 +47,20 @@ public class DashBoardController  {
 
         TreeItem<String> monthlyNode = new TreeItem<>(monthly_report);
         TreeItem<String> categoryNode = new TreeItem<>(category);
+        TreeItem<String> varityNode = new TreeItem<>(variety);
         TreeItem<String> itemNode = new TreeItem<>(item);
         TreeItem<String> taxNode = new TreeItem<>(tax);
         TreeItem<String> comboNode = new TreeItem<>(combo);
         TreeItem<String> tableNode = new TreeItem<>(table);
-        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode, itemNode,taxNode,comboNode,tableNode);
+        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode);
 
         TreeItem<String> nodeItemA1 = new TreeItem<>(add_category);
         TreeItem<String> nodeItemA2 = new TreeItem<>(view_category);
         categoryNode.getChildren().addAll(nodeItemA1, nodeItemA2);
+
+        TreeItem<String> nodeAddVarity = new TreeItem<>(add_varity);
+        TreeItem<String> nodeListVarity = new TreeItem<>(view_varity);
+        varityNode.getChildren().addAll(nodeAddVarity, nodeListVarity);
 
         TreeItem<String> addItem = new TreeItem<>(add_Item);
         TreeItem<String> listItem = new TreeItem<>(list_item);
@@ -115,6 +120,12 @@ public class DashBoardController  {
                 }else if (selectedItem.getValue().equals(list_table))
                 {
                     changePane("/RestarantApp/menuFxml/table_list_scene.fxml");
+                }else if (selectedItem.getValue().equals(add_varity))
+                {
+                    changePane("/RestarantApp/menuFxml/varietyscene.fxml");
+                }else if (selectedItem.getValue().equals(view_varity))
+                {
+                    changePane("/RestarantApp/menuFxml/variety_list_controller.fxml");
                 }
             }
         });
