@@ -46,6 +46,8 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -122,7 +124,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     @FXML
     ImageView imgConectionStatus,imgPlaceOrder,btnAddItem;
     BillingSaveModel billingSaveModel = BillingSaveModel.getInstance();
-    String tax1,tax2;
+    String tax1,tax2,tax_1,tax_2;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //database connecttivity
@@ -191,6 +193,50 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                     txtFieldId.setText(newValue.replaceAll("[^\\d]", ""));
 
+                }
+            }
+        });
+
+        txtFieldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtQty.requestFocus();
+                        }
+                    });
+                }
+            }
+        });
+
+        txtQty.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnAddItem.requestFocus();
+                        }
+                    });
+                }
+            }
+        });
+        btnAddItem.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            addItem();
+                        }
+                    });
                 }
             }
         });
@@ -583,7 +629,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     }
 
-    public void btnAddItem(MouseEvent mouseEvent) {
+
+    public void addItem()
+    {
         Platform.runLater(new Runnable(){
 
             @Override
@@ -633,7 +681,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             double price = Double.valueOf(selectedItem.getPrice());
                             amt = amt * price;
                             String amount = String.valueOf(amt);
-                             billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false,false);
+                            billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false,false);
                             modelObservableList.add(billingModel);
                             tableBill.setItems(modelObservableList);
                             itemIdList.add(Integer.parseInt(selectedItem.getShort_code()));
@@ -661,51 +709,20 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     txtFieldName.clear();
 
 
-           /* if (modelObservableList.size() != 0) {
-                for (int j = 0; j < modelObservableList.size(); j++) {
-                    BillingModel billingModelList = modelObservableList.get(j);
-                    System.out.println("shor code--->"+modelObservableList.size());
-                    if (billingModelList.getItem_id().equals(selectedItem.getShort_code())) {
-
-                        int alreadyValue = Integer.parseInt(billingModelList.getQuantity());
-                        int newQty = Integer.parseInt(txtQty.getText());
-                        newQty = newQty + alreadyValue;
-                        double amt = Double.valueOf(newQty);
-                        double price = Double.valueOf(selectedItem.getPrice());
-                        amt = amt * price;
-                        String amount = String.valueOf(amt);
-                        serialNo = billingModelList.getS_no();
-                        BillingModel billingModel = new BillingModel(serialNo, selectedItem.getItem_name(),String.valueOf(newQty), selectedItem.getPrice(), amount, selectedItem.getShort_code());
-                        modelObservableList.set(j,billingModel);
-                        setSubTotal();
-//                        tableBill.setItems(modelObservableList);
-                    }else
-                    {
-                        double amt = Double.valueOf(txtQty.getText());
-                        double price = Double.valueOf(selectedItem.getPrice());
-                        amt = amt * price;
-                        String amount = String.valueOf(amt);
-                        BillingModel billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code());
-                        modelObservableList.add(billingModel);
-                    }
-                }
-            }else
-            {
-                double amt = Double.valueOf(txtQty.getText());
-                double price = Double.valueOf(selectedItem.getPrice());
-                amt = amt * price;
-                String amount = String.valueOf(amt);
-                BillingModel billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), txtQty.getText(), selectedItem.getPrice(), amount, selectedItem.getShort_code());
-                modelObservableList.add(billingModel);
-                tableBill.setItems(modelObservableList);
-                setSubTotal();
-            }*/
-
-                }
+            }
 
                 serialNo++;
             }
         });
+    }
+    public void btnAddItem(MouseEvent mouseEvent) {
+        if (selectedTable != null )
+        {
+            addItem();
+        }else
+        {
+            Constants.showAlert(Alert.AlertType.WARNING,"Warning","Warning","Please Select Table");
+        }
 
     }
 
@@ -854,9 +871,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                 Integer comb1 = list.getComp1();
                                 Integer comb2 = list.getComp2();
                                 System.out.println("get combination--->"+getTaxListDetails.get(comb1));
-                                tax1 = getTaxListDetails.get(comb1)+"("+getTaxListDetails.get(comb1) + "%)";
-                                tax2 =  getTaxListDetails.get(comb1)+"("+getTaxListDetails.get(comb2) + "%)";
+                                tax1 = taxNAme.get(comb1)+"("+getTaxListDetails.get(comb1) + "%)";
+                                tax2 =  taxNAme.get(comb2)+"("+getTaxListDetails.get(comb2) + "%)";
                                 intTaxPrice = getTaxListDetails.get(comb1)+getTaxListDetails.get(comb2);
+                                tax_1 = String.valueOf(getTaxListDetails.get(comb1));
+                                tax_2 = String.valueOf(getTaxListDetails.get(comb2));
                                 System.out.println("get combination--->"+intTaxPrice);
                                 txtGstPercent.setText(String.valueOf(intTaxPrice)+"%");
                                 txtGstPercent.setEditable(false);
@@ -1797,12 +1816,27 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
         }
+        double gst = Double.parseDouble(txtTotalAmount.getText());
+        double tax_value = Double.parseDouble(tax_1);
+        double gstValue = (tax_value/100);
+        gstValue = gstValue * gst;
+
+
+        double gst_1 = Double.parseDouble(txtTotalAmount.getText());
+        double tax_value_1 = Double.parseDouble(tax_2);
+        double gstValue_1 = (tax_value_1/100);
+        gstValue_1 = gstValue_1 * gst_1;
+
+        String val = String.valueOf(gstValue);
+        String val1 = String.valueOf(gstValue_1);
+
+        System.out.print("gst value-------->"+gstValue);
         String line = "------------------------------------------";
         String subTotal=String.format("%32s : %5s\n","Sub Total",txtTotalAmount.getText());
         String percentage=String.format("%26s(%2s%%): %1s\n","Discount",txtFiledDiscount.getText(),txtFiledDiscountAmount.getText());
         String netTotal = String.format("%32s : %2s\n","Net Total",txtFileldGross.getText());
-        String cgst = String.format("%32s : %2s\n",tax1,txtFileldGross.getText());
-        String scgst = String.format("%32s : %2s\n",tax2,txtFileldGross.getText());
+        String cgst = String.format("%32s : %2s\n",tax1,val);
+        String scgst = String.format("%32s : %2s\n",val1);
         String line1 = String.format("%40s\n","--------------------");
         String grantTotl = String.format("%32s : %5s\n","Grand Total",txtTotal.getText());
         if (!txtFiledDiscountAmount.getText().isEmpty()) {
@@ -1812,6 +1846,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             header = header + listItem + item_header + item + line + subTotal  + netTotal+cgst+scgst+line1+grantTotl+"\n\n\n\n\n\n\n";
         }
 
+        System.out.print(header);
         ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
         dialog.setHeaderText("Choose the printer!");
         dialog.setContentText("Choose a printer from available printers");

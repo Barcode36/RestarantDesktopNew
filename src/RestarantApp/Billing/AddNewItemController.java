@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
@@ -18,6 +19,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -53,7 +56,167 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
         this.addNewItemListener = addItemListener;
     }
     public void btnNewOrder(ActionEvent actionEvent) {
+        submitDetails();
 
+    }
+
+
+    public void closeImageClicked(MouseEvent mouseEvent) {
+        Stage stage = (Stage) closeButton.getScene().getWindow();
+        stage.close();
+    }
+
+    public void minimizemageClicked(MouseEvent event) {
+        Stage stage = (Stage) minizeButton.getScene().getWindow();
+        stage.setIconified(true);
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+
+        String css = AddNewItemController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
+        catRootPane.getStylesheets().add(css);
+        jfxSnackbar = new JFXSnackbar(catRootPane);
+        NetworkConnection networkConnection = new NetworkConnection(AddNewItemController.this);
+        listTable.add("Parcel");
+        SqliteConnection sqliteConnection = new SqliteConnection();
+        listTable.addAll(sqliteConnection.getAllTableData());
+        selectTable.setItems(listTable);
+        selectTable.getSelectionModel().selectFirst();
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                txtMobileNumber.requestFocus();
+            }
+        });
+
+        txtMobileNumber.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER))
+                {
+                    System.out.print("Enter key");
+                    searchMobileNumber();
+                }else if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtName.requestFocus();
+                        }
+                    });
+
+                }
+            }
+        });
+        txtName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtMailId.requestFocus();
+                        }
+                    });
+
+
+                }
+            }
+        });
+        txtMailId.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtAddress.requestFocus();
+                        }
+                    });
+
+
+                }
+            }
+        });
+        txtAddress.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER))
+                {
+                    System.out.print("Enter key");
+                    submitDetails();
+                }
+            }
+        });
+//        isConnectedNetwork =  networkConnection.isInternetReachable();
+    }
+
+
+
+    @Override
+    public void Networkchanged(boolean isConnected) {
+       isConnectedNetwork = isConnected;
+    }
+
+    public void btnSearchNumber(ActionEvent actionEvent) {
+
+        searchMobileNumber();
+
+    }
+
+    public void searchMobileNumber()
+    {
+        if (isConnectedNetwork)
+        {
+            APIService apiInterface = RetrofitClient.getClient().create(APIService.class);
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("phone",txtMobileNumber.getText());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            Call<CustomerDetails> customerDetailsCall = apiInterface.searchNumber(jsonObject);
+            customerDetailsCall.enqueue(new Callback<CustomerDetails>() {
+                @Override
+                public void onResponse(Call<CustomerDetails> call, Response<CustomerDetails> response) {
+                    if (response.isSuccessful())
+                    {
+                        CustomerDetails customerDetails = response.body();
+                        if (customerDetails.getStatus_code().equals(Constants.Success))
+                        {
+                            txtMailId.setText(customerDetails.getEmail());
+                            txtAddress.setText(customerDetails.getAddress());
+                            txtName.setText(customerDetails.getName());
+                        }else
+                        {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    jfxSnackbar.show(customerDetails.getStatus_message(),5000);
+                                }
+                            });
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<CustomerDetails> call, Throwable throwable) {
+
+                }
+            });
+        }else
+        {
+            jfxSnackbar.show("Network not connected",5000);
+        }
+    }
+
+    public void submitDetails()
+    {
         if (isConnectedNetwork) {
             APIService apiInterface = RetrofitClient.getClient().create(APIService.class);
             JSONObject jsonObject = new JSONObject();
@@ -132,83 +295,6 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                     Stage stage = (Stage) closeButton.getScene().getWindow();
                     stage.close();
                     addNewItemListener.addNewItem();
-                }
-            });
-        }
-    }
-
-
-    public void closeImageClicked(MouseEvent mouseEvent) {
-        Stage stage = (Stage) closeButton.getScene().getWindow();
-        stage.close();
-    }
-
-    public void minimizemageClicked(MouseEvent event) {
-        Stage stage = (Stage) minizeButton.getScene().getWindow();
-        stage.setIconified(true);
-    }
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-
-        String css = AddNewItemController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
-        catRootPane.getStylesheets().add(css);
-        jfxSnackbar = new JFXSnackbar(catRootPane);
-        NetworkConnection networkConnection = new NetworkConnection(AddNewItemController.this);
-        listTable.add("Parcel");
-        SqliteConnection sqliteConnection = new SqliteConnection();
-        listTable.addAll(sqliteConnection.getAllTableData());
-        selectTable.setItems(listTable);
-        selectTable.getSelectionModel().selectFirst();
-//        isConnectedNetwork =  networkConnection.isInternetReachable();
-    }
-
-
-
-    @Override
-    public void Networkchanged(boolean isConnected) {
-       isConnectedNetwork = isConnected;
-    }
-
-    public void btnSearchNumber(ActionEvent actionEvent) {
-
-        if (isConnectedNetwork)
-        {
-            APIService apiInterface = RetrofitClient.getClient().create(APIService.class);
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("phone",txtMobileNumber.getText());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            Call<CustomerDetails> customerDetailsCall = apiInterface.searchNumber(jsonObject);
-            customerDetailsCall.enqueue(new Callback<CustomerDetails>() {
-                @Override
-                public void onResponse(Call<CustomerDetails> call, Response<CustomerDetails> response) {
-                    if (response.isSuccessful())
-                    {
-                        CustomerDetails customerDetails = response.body();
-                        if (customerDetails.getStatus_code().equals(Constants.Success))
-                        {
-                            txtMailId.setText(customerDetails.getEmail());
-                            txtAddress.setText(customerDetails.getAddress());
-                            txtName.setText(customerDetails.getName());
-                        }else
-                        {
-                            Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    jfxSnackbar.show(customerDetails.getStatus_message(),5000);
-                                }
-                            });
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<CustomerDetails> call, Throwable throwable) {
-
                 }
             });
         }
