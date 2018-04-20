@@ -314,6 +314,19 @@ public class SqliteConnection {
             e.printStackTrace();
         }
     }
+
+    public void deleteKotMaster()
+    {
+        String query = "DELETE FROM KOT_MASTER";
+        preparedStatement = null;
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.execute();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     public ArrayList getAllData()
     {
         ArrayList<BillingSaveModel> getAllData = new ArrayList();

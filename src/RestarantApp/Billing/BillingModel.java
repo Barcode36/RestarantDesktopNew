@@ -1,10 +1,13 @@
 package RestarantApp.Billing;
 
+import java.util.ArrayList;
+
 public class BillingModel {
 
     int s_no;
     String item_name,quantity,rate,amount,item_id,customer_id,from;
     boolean isPlacedSale,isSendKot;
+    ArrayList getKotList = new ArrayList();
 
     public BillingModel(int s_no,String item_name,String quantity,String rate,String amount,String item_id,String customer_id,String from,boolean isPlacedSale,boolean isSendKot)
     {
@@ -26,6 +29,14 @@ public class BillingModel {
 
     public void setSendKot(boolean sendKot) {
         isSendKot = sendKot;
+    }
+
+    public ArrayList getGetKotList() {
+        return getKotList;
+    }
+
+    public void setGetKotList(ArrayList getKotList) {
+        this.getKotList = getKotList;
     }
 
     public boolean isPlacedSale() {

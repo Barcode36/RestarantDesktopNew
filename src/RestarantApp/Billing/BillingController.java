@@ -123,6 +123,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     String tax1,tax2,tax_1,tax_2;
     ArrayList<String> checkBoxIndex = new ArrayList<>();
     String kotLastDate;
+    ArrayList<String> kotList = new ArrayList();
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //database connecttivity
@@ -1911,7 +1912,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     public void printThisBill()
     {
 
-
+        int lastKot_number = sqliteConnection.getLastKOTNumber();
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
         //get current date time with Date()
@@ -1934,12 +1935,20 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             String dateStart =sqliteConnection.getLastKOTDATE();
             String dateStop = dateFormat_1.format(date_1);
 
-            int lastKot_number = sqliteConnection.getLastKOTNumber();
-            sqliteConnection.insertKot(lastKot_number+1,dateFormat_1.format(date_1));
 
 
 
         SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+
+            Calendar cal = Calendar.getInstance();
+
+            int year = cal.get(Calendar.YEAR);
+            int month = cal.get(Calendar.MONTH) ;
+            int currDate = cal.get(Calendar.DATE);
+            cal.set(year,month,currDate,1,0,0);
+
+            Date setTime = cal.getTime();
 
         Date d1 = null;
         Date d2 = null;
@@ -1948,14 +1957,26 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             d1 = format.parse(dateStart);
             d2 = format.parse(dateStop);
 
-            DateTime dt1 = new DateTime(d1);
+            DateTime dt1 = new DateTime(setTime);
             DateTime dt2 = new DateTime(d2);
 
+            int get_hour = Hours.hoursBetween(dt2, dt1).getHours() % 24 ;
+
             System.out.print(Days.daysBetween(dt1, dt2).getDays() + " days, ");
-            System.out.print(Hours.hoursBetween(dt1, dt2).getHours() % 24 + " hours, ");
+            System.out.print(Hours.hoursBetween(dt2, dt1).getHours() % 24 + " hours, ");
             System.out.print(Minutes.minutesBetween(dt1, dt2).getMinutes() % 60 + " minutes, ");
             System.out.print(Seconds.secondsBetween(dt1, dt2).getSeconds() % 60 + " seconds.");
+            if (get_hour < 24 || get_hour == 0)
+            {
 
+                sqliteConnection.insertKot(lastKot_number+1,dateFormat_1.format(date_1));
+
+            }else
+            {
+                sqliteConnection.deleteKotMaster();
+                sqliteConnection.insertKot(100,dateFormat_1.format(date_1));
+                kotLastDate = sqliteConnection.getLastKOTDATE();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1964,8 +1985,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         String header =
                 "       **** Prawn And Crab ****       \n\n"
                +"                  KOT                 \n\n"
-               +" KOT No:                 Date:"+currentDate+"\n"
-               +" Table No:               Time:"+currentTime +"\n\n";
+               +" KOT No:"+String.valueOf(lastKot_number +1)+"                 Date:"+currentDate+"\n"
+               +" Table No:"+selectedTable+"               Time:"+currentTime +"\n\n";
 
 
         String  listItem = "            List Of Items            \n"
@@ -1998,6 +2019,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     totalQty[0] = totalQty[0] + Integer.parseInt(qty);
                     item[0] = item[0] +"   "+ ssNo[0] + "        "+item_name + "          "+qty+"\n";
                     billingModel.setSendKot(true);
+                    kotList.add(String.valueOf(lastKot_number+1));
+                    billingModel.setGetKotList(kotList);
 
 
                 }
@@ -2008,6 +2031,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         String line = " ------------------------------------\n";
         String total_item = "                     Total Item  "+ totalQty[0];
         header = header+listItem+item_header+ item[0] +line+total_item+"\n\n\n\n\n\n\n";
+        System.out.print(header);
      /*   PrinterService printerService = new PrinterService();
         //print some stuff
         printerService.printString("RP3150 STAR(U) 1",header);
@@ -2019,7 +2043,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
 
-      /*  ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
+        ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
         dialog.setHeaderText("Choose the printer!");
         dialog.setContentText("Choose a printer from available printers");
         dialog.setTitle("Printer Choice");
@@ -2054,7 +2078,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 }
             });
 
-        }*/
+        }else
+        {
+
+        }
 
 
     }
@@ -2063,6 +2090,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     public void printBill()
     {
+        for (int j = 0 ; j < kotList.size() ; j ++)
+        {
+            System.out.print("kot list--->"+kotList.get(j));
+        }
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
         //get current date time with Date()
@@ -2080,7 +2111,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         "        Thavalakuppam, Pondicherry-605007.\n\n"
                         +" GST NO:34GWGPS3087B1ZE                  \n"
                         +" Date:"+currentDate+"       Time:"+currentTime+"\n"
-                        +" Table No:"+selectedTable +           "\n\n";
+                        +" Table No:"+selectedTable+"       KOT:"+String.join(",",kotList)+         "\n\n";
 
 
         String  listItem = "            List Of Items            \n"
