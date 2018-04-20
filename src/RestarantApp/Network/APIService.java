@@ -1,9 +1,6 @@
 package RestarantApp.Network;
 
-import RestarantApp.model.CustomerDetails;
-import RestarantApp.model.ItemListRequestAndResponseModel;
-import RestarantApp.model.LoginRequestAndResponse;
-import RestarantApp.model.RequestAndResponseModel;
+import RestarantApp.model.*;
 import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.http.Field;
@@ -68,6 +65,9 @@ public interface APIService {
 
     @POST("tax_list.php")
     Call<RequestAndResponseModel> getTaxList();
+
+    @POST("tax_list.php")
+    Call<TaxModel> getTaxList1();
 
     @FormUrlEncoded
     @POST("tax_add.php")

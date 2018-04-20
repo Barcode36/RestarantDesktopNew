@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
@@ -18,7 +19,9 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
@@ -31,10 +34,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LoginController {
     @FXML
@@ -64,28 +64,63 @@ public class LoginController {
         });
 
 
+        txtFieldPassword.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER))
+                {
+                    login();
+                }
+            }
+        });
+
+
+    }
+
+    public void login()
+    {
+        try {
+        if (txtFieldUsername.getText().equals("admin") && txtFieldPassword.getText().equals("admin"))
+        {
+            Stage stage;
+            stage=(Stage) btnLogin.getScene().getWindow();
+            Parent   root = FXMLLoader.load(getClass().getResource("/RestarantApp/Dashboard/DashBoardScene.fxml"));
+            stage.setTitle("Prawn And Crabs");
+            Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+            stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
+            stage.show();
+        }else if (txtFieldUsername.getText().equals("test") && txtFieldPassword.getText().equals("test")) {
+            Stage stage;
+            Parent root;
+            stage=(Stage) btnLogin.getScene().getWindow();
+            root = FXMLLoader.load(getClass().getResource("/RestarantApp/Billing/billingscene.fxml"));
+            stage.setTitle("Prawn And Crabs");
+            Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+            stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
+            stage.show();
+        }else
+        {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Login");
+            alert.setHeaderText("Login Error");
+            alert.setContentText("Username and Password Invalid !!!");
+
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.get() == ButtonType.OK){
+                // ... user chose OK
+            } else {
+                // ... user chose CANCEL or closed the dialog
+            }
+        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
     public void onLoginButtonClick(ActionEvent actionEvent) throws IOException {
 
-        Stage stage;
-        Parent root;
-        stage=(Stage) btnLogin.getScene().getWindow();
-        root = FXMLLoader.load(getClass().getResource("/RestarantApp/Billing/billingscene.fxml"));
-        stage.setTitle("Prawn And Crabs");
-        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
-        stage.show();
 
-
-       /* Stage stage;
-        Parent root;
-        stage=(Stage) btnLogin.getScene().getWindow();
-        root = FXMLLoader.load(getClass().getResource("/RestarantApp/Dashboard/DashBoardScene.fxml"));
-        stage.setTitle("Prawn And Crabs");
-        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
-        stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
-        stage.show();*/
+        login();
 
         /*FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/RestarantApp/Dashboard/DashBoardScene.fxml"));
         Parent root1 = (Parent) fxmlLoader.load();

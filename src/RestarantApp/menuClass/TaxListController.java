@@ -5,6 +5,7 @@ import RestarantApp.Network.RetrofitClient;
 import RestarantApp.model.Constants;
 import RestarantApp.model.ItemListRequestAndResponseModel;
 import RestarantApp.model.RequestAndResponseModel;
+import RestarantApp.model.TaxModel;
 import RestarantApp.popup.ItemActionPopup;
 import RestarantApp.popup.TaxActionPopup;
 import com.jfoenix.controls.JFXSnackbar;
@@ -365,17 +366,17 @@ public class TaxListController implements Initializable {
     private void getTaxFiled() {
         retrofitClient = RetrofitClient.getClient().create(APIService.class);
 
-        Call<RequestAndResponseModel> getTaxCall = retrofitClient.getTaxList();
-        getTaxCall.enqueue(new Callback<RequestAndResponseModel>() {
+        Call<TaxModel> getTaxCall = retrofitClient.getTaxList1();
+        getTaxCall.enqueue(new Callback<TaxModel>() {
             @Override
-            public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+            public void onResponse(Call<TaxModel> call, Response<TaxModel> response) {
                 if (response.isSuccessful()) {
-                    RequestAndResponseModel requestAndResponseModel = response.body();
+                    TaxModel requestAndResponseModel = response.body();
 
 
                     for (int i=0;i < requestAndResponseModel.getList().size() ; i ++)
                     {
-                        RequestAndResponseModel.list list = requestAndResponseModel.getList().get(i);
+                        TaxModel.list list = requestAndResponseModel.getList().get(i);
                         getComboId.put(Integer.valueOf(list.getId()),list.getName());
                     }
                     getTableData();
@@ -384,7 +385,7 @@ public class TaxListController implements Initializable {
             }
 
             @Override
-            public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
+            public void onFailure(Call<TaxModel> call, Throwable throwable) {
 
             }
         });

@@ -247,6 +247,73 @@ public class SqliteConnection {
 
         return lastOrder_id;
     }
+
+    public String getLastKOTDATE()
+    {
+        String lastOrder_id = null;
+        ResultSet rs;
+        String query ="SELECT * FROM    KOT_MASTER WHERE   DATE_KOT = (SELECT MAX(DATE_KOT )  FROM KOT_MASTER);";
+        preparedStatement = null;
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            rs = preparedStatement.executeQuery();
+
+            while (rs.next())
+            {
+                lastOrder_id =   rs.getString(3);
+
+                System.out.println("value-->"+lastOrder_id );
+            }
+            preparedStatement.close();
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
+
+        return lastOrder_id;
+    }
+
+    public int getLastKOTNumber()
+    {
+        int lastOrder_id = 0;
+        ResultSet rs;
+        String query ="SELECT * FROM    KOT_MASTER WHERE   KOT_NUMBER = (SELECT MAX(KOT_NUMBER )  FROM KOT_MASTER);";
+        preparedStatement = null;
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            rs = preparedStatement.executeQuery();
+
+            while (rs.next())
+            {
+                lastOrder_id =   rs.getInt(2);
+
+                System.out.println("value-->"+lastOrder_id );
+            }
+            preparedStatement.close();
+            rs.close();
+        } catch (SQLException e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
+
+        return lastOrder_id;
+    }
+
+    public void insertKot(int kot_number,String kot_date )
+    {
+        String query = "INSERT INTO KOT_MASTER(KOT_NUMBER, DATE_KOT) VALUES (?,?)";
+        preparedStatement = null;
+        try {
+            preparedStatement = connector().prepareStatement(query);
+            preparedStatement.setInt(1,kot_number);
+            preparedStatement.setString(2,kot_date);
+            preparedStatement.execute();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     public ArrayList getAllData()
     {
         ArrayList<BillingSaveModel> getAllData = new ArrayList();

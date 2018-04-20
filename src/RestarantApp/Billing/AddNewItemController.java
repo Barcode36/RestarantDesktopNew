@@ -170,8 +170,7 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
 
     public void searchMobileNumber()
     {
-        if (isConnectedNetwork)
-        {
+
             APIService apiInterface = RetrofitClient.getClient().create(APIService.class);
             JSONObject jsonObject = new JSONObject();
             try {
@@ -201,6 +200,8 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                                 }
                             });
                         }
+
+                        isConnectedNetwork = true;
                     }
                 }
 
@@ -209,10 +210,7 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
 
                 }
             });
-        }else
-        {
-            jfxSnackbar.show("Network not connected",5000);
-        }
+
     }
 
     public void submitDetails()
@@ -253,7 +251,7 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                                 customer_id.setName(txtName.getText());
                             }*/
 
-                            customer_id.setName(String.valueOf(selectTable.getSelectionModel().getSelectedItem()));
+                            customer_id.setName(txtName.getText());
                             customer_id.setMobile_num(txtMobileNumber.getText());
                             customer_id.setCustomer_address( " ");
                             customer_id.setCustomer_email(txtMailId.getText());

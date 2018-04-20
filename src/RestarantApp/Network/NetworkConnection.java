@@ -63,12 +63,16 @@ public class NetworkConnection {
 
                     //open a connection to that source
                     HttpURLConnection urlConnect = null;
-                    try {
-                        urlConnect = (HttpURLConnection)url.openConnection();
+//                    try {
+
                         //trying to retrieve data from the source. If there
                         //is no connection, this line will fail
                         try {
-                            Object objData = urlConnect.getContent();
+//                            Object objData = urlConnect.getContent();
+
+                            URLConnection urlConnection = url.openConnection();
+                            urlConnection.connect();
+//                            urlConnect = (HttpURLConnection)url.openConnection();
                             networkChangeListener.Networkchanged(true);
                             isConnected = true;
 
@@ -93,12 +97,12 @@ public class NetworkConnection {
                             isConnected = false;
                         }
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        networkChangeListener.Networkchanged(false);
-                        isConnected = false;
-
-                    }
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                        networkChangeListener.Networkchanged(false);
+//                        isConnected = false;
+//
+//                    }
 
                     try {
                         sleep(1000);
