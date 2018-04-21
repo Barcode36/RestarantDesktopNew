@@ -1946,7 +1946,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             int year = cal.get(Calendar.YEAR);
             int month = cal.get(Calendar.MONTH) ;
             int currDate = cal.get(Calendar.DATE);
-            cal.set(year,month,currDate,1,0,0);
+            cal.set(year,month,currDate,6,0,0);
 
             Date setTime = cal.getTime();
 
@@ -1985,8 +1985,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         String header =
                 "       **** Prawn And Crab ****       \n\n"
                +"                  KOT                 \n\n"
-               +" KOT No:"+String.valueOf(lastKot_number +1)+"                 Date:"+currentDate+"\n"
-               +" Table No:"+selectedTable+"               Time:"+currentTime +"\n\n";
+               +" KOT No:"+String.valueOf(lastKot_number +1)+"                Date:"+currentDate+"\n"
+               +" Table No:"+selectedTable+"             Time:"+currentTime +"\n\n";
 
 
         String  listItem = "            List Of Items            \n"
@@ -2029,7 +2029,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             }
         }
         String line = " ------------------------------------\n";
-        String total_item = "                     Total Item  "+ totalQty[0];
+        String total_item = "                     Total Item(s)  "+ totalQty[0];
         header = header+listItem+item_header+ item[0] +line+total_item+"\n\n\n\n\n\n\n";
         System.out.print(header);
      /*   PrinterService printerService = new PrinterService();
@@ -2094,6 +2094,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         {
             System.out.print("kot list--->"+kotList.get(j));
         }
+
+        Set<String> s = new LinkedHashSet<String>(kotList);
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
         //get current date time with Date()
@@ -2111,10 +2113,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         "        Thavalakuppam, Pondicherry-605007.\n\n"
                         +" GST NO:34GWGPS3087B1ZE                  \n"
                         +" Date:"+currentDate+"       Time:"+currentTime+"\n"
-                        +" Table No:"+selectedTable+"       KOT:"+String.join(",",kotList)+         "\n\n";
+                        +" Table No:"+selectedTable+"       KOT:"+String.join(",",s)+         "\n\n";
 
 
-        String  listItem = "            List Of Items            \n"
+        String  listItem = "            List of Items            \n"
                 +"            -------------             \n";
 
         String item_header =String.format("%2s %-17s %4s %6s %7s\n","S.No","Item Name","Qty","Rate","Amount");
@@ -2165,7 +2167,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                 double rateValue = Double.parseDouble(billingModel.getRate());
                 double amt1 = rateValue * Qty;
-                item =item + String.format("%2s %-16s %5s %7s %4.2f\n",ssNo,item_name, Qty, rate,amt1);
+                item =item + String.format("%2s %-16s %5s %7s %5.2f\n",ssNo,item_name, Qty, rate,amt1);
 
 
             }
