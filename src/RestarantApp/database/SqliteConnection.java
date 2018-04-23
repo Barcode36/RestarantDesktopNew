@@ -124,7 +124,7 @@ public class SqliteConnection {
             preparedStatement.setString(1, tableName);
             ResultSet resultSet = preparedStatement.executeQuery();
             if(resultSet.next()) {
-                status = resultSet.getInt(1);
+                status = resultSet.getInt(2);
             }
             preparedStatement.close();
         } catch (SQLException e) {
@@ -215,9 +215,10 @@ public class SqliteConnection {
                      count = numberOfRows;
                  } else {
                  }
-                 preparedStatement.close();
-                 rs.close();
+
              }
+            preparedStatement.close();
+            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -286,14 +287,14 @@ public class SqliteConnection {
             preparedStatement = connector().prepareStatement(query);
             rs = preparedStatement.executeQuery();
 
-            while (rs.next())
-            {
-                lastOrder_id =   rs.getInt(2);
+                while (rs.next()) {
+                    lastOrder_id = rs.getInt(2);
 
-                System.out.println("value-->"+lastOrder_id );
-            }
-            preparedStatement.close();
-            rs.close();
+                    System.out.println("last kot number-->" + lastOrder_id);
+                }
+                preparedStatement.close();
+                rs.close();
+
         } catch (SQLException e) {
             System.out.println(e);
             e.printStackTrace();

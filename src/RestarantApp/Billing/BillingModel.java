@@ -5,11 +5,11 @@ import java.util.ArrayList;
 public class BillingModel {
 
     int s_no;
-    String item_name,quantity,rate,amount,item_id,customer_id,from;
+    String item_name,notes,quantity,rate,amount,item_id,customer_id,from;
     boolean isPlacedSale,isSendKot;
     ArrayList getKotList = new ArrayList();
 
-    public BillingModel(int s_no,String item_name,String quantity,String rate,String amount,String item_id,String customer_id,String from,boolean isPlacedSale,boolean isSendKot)
+    public BillingModel(int s_no,String item_name,String notes,String quantity,String rate,String amount,String item_id,String customer_id,String from,boolean isPlacedSale,boolean isSendKot)
     {
         this.s_no = s_no;
         this.item_name = item_name;
@@ -21,6 +21,15 @@ public class BillingModel {
          this.customer_id = customer_id;
          this.isPlacedSale = isPlacedSale;
          this.isSendKot = isSendKot;
+         this.notes = notes;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public boolean isSendKot() {

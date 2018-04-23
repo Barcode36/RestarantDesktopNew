@@ -48,7 +48,7 @@
                         <Image url="@../images/notification.png" />
                      </image>
                   </ImageView>
-                  <ImageView fitHeight="30.0" fitWidth="87.0" layoutX="1051.0" layoutY="114.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="imgRefresh" onMouseClicked="#imgRefreshItem" fitHeight="30.0" fitWidth="87.0" layoutX="1051.0" layoutY="114.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/refres.png" />
                      </image>
@@ -168,7 +168,7 @@
                   </Label>
                   <TextField fx:id="txtTotalAmount" layoutX="166.0" layoutY="15.0" prefHeight="25.0" prefWidth="127.0" />
                   <ChoiceBox fx:id="comboPaymentMethod" layoutX="164.0" layoutY="303.0" prefHeight="25.0" prefWidth="127.0" />
-                  <ImageView onMouseClicked="#btnprintBill" fitHeight="30.0" fitWidth="90.0" layoutX="8.0" layoutY="343.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="30.0" fitWidth="90.0" layoutX="8.0" layoutY="343.0" onMouseClicked="#btnprintBill" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/printbill.png" />
                      </image>
@@ -178,7 +178,7 @@
                         <Image url="@../images/placeorder.png" />
                      </image>
                   </ImageView>
-                  <ImageView fx:id="printKot" onMouseClicked="#btnPrintKot" fitHeight="30.0" fitWidth="98.0" layoutX="105.0" layoutY="343.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="printKot" fitHeight="30.0" fitWidth="98.0" layoutX="105.0" layoutY="343.0" onMouseClicked="#btnPrintKot" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/kot.png" />
                      </image>
@@ -191,6 +191,7 @@
          <columns>
             <TableColumn fx:id="colSno" prefWidth="91.0" text="Sno" />
             <TableColumn fx:id="colItem" prefWidth="97.0" text="Item " />
+            <TableColumn fx:id="colAddNotes" prefWidth="91.0" text="Add Notes" />
             <TableColumn fx:id="colQty" prefWidth="111.0" text="Quantity" />
             <TableColumn fx:id="colRate" prefWidth="70.0" text="Rate" />
             <TableColumn fx:id="colAmount" prefWidth="56.0" text="Amount" />
