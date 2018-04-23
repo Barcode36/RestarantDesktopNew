@@ -37,7 +37,7 @@ public class RabbitmqServer extends AsyncTask {
             InetAddress inetAddress = InetAddress.getLocalHost();
             System.out.println("IP Address:- " + inetAddress.getHostAddress());
             client = new Client(inetAddress.getHostAddress(),61613, "restaurantServer", "restaurant");
-            System.out.println("Background Called");
+            System.out.println("Rabbitmq server connected");
             client.subscribe("/topic/resturantApp", new Listener() {
                 @Override
                 public void message(Map headers, String body) {
@@ -81,7 +81,7 @@ public class RabbitmqServer extends AsyncTask {
     public void onPostExecute(Object params) {
         if (client.isConnected())
         {
-            System.out.println("client connected");
+            System.out.println(" rabbitmq client connected");
         }
 
     }
