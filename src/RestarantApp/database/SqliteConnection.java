@@ -209,13 +209,15 @@ public class SqliteConnection {
         try {
             preparedStatement = connector().prepareStatement(query);
              rs = preparedStatement.executeQuery();
-            if (rs.next()) {
-                int numberOfRows = rs.getInt(1);
-                count = numberOfRows;
-            } else {
-            }
-            preparedStatement.close();
-            rs.close();
+             if (rs.isClosed()) {
+                 if (rs.next()) {
+                     int numberOfRows = rs.getInt(1);
+                     count = numberOfRows;
+                 } else {
+                 }
+                 preparedStatement.close();
+                 rs.close();
+             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
