@@ -7,7 +7,7 @@ public class LoginRequestAndResponse {
         return ourInstance;
     }
 
-    public String status_code,status_message,no_of_visit,success,customer_id,name,mobile_num,customer_email,customer_address;
+    public String status_code,status_message,no_of_visit,success,customer_id,name,mobile_num,customer_email,customer_address,Status_code;
 
     public String getMobile_num() {
         return mobile_num;
@@ -47,6 +47,14 @@ public class LoginRequestAndResponse {
 
     public void setStatus_code(String status_code) {
         this.status_code = status_code;
+    }
+
+    public String getStatusCode() {
+        return Status_code;
+    }
+
+    public void setStatusCode(String status_code) {
+        this.Status_code = status_code;
     }
 
     public String getStatus_message() {

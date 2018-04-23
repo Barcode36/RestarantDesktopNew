@@ -182,27 +182,27 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
         new RabbitmqServer(this).execute();
         setTableDetails();
-        NetworkConnection networkConnection = new NetworkConnection(BillingController.this);
+       NetworkConnection networkConnection = new NetworkConnection(BillingController.this);
 
-        isConnectedNetwork =  networkConnection.isInternetReachable();
+         isConnectedNetwork =  networkConnection.isInternetReachable();
         FileInputStream input = null;
-        if (isConnectedNetwork) {
+      /* if (isConnectedNetwork) {
 
             try {
-                input = new FileInputStream("src/RestarantApp/images/online.png");
+                input = new FileInputStream("RestarantApp/images/online.png");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }else
         {
             try {
-                input = new FileInputStream("src/RestarantApp/images/offline.png");
+                input = new FileInputStream("RestarantApp/images/offline.png");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
         Image image = new Image(input);
-        imgConectionStatus.setImage(image);
+        imgConectionStatus.setImage(image);*/
 
         Platform.runLater(new Runnable() {
             @Override
@@ -478,14 +478,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         if (isConnectedNetwork) {
 
             try {
-                input = new FileInputStream("src/RestarantApp/images/online.png");
+                input = new FileInputStream("RestarantApp/images/online.png");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }else
         {
             try {
-                input = new FileInputStream("src/RestarantApp/images/offline.png");
+                input = new FileInputStream("RestarantApp/images/offline.png");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }

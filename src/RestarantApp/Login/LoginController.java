@@ -1,12 +1,17 @@
 package RestarantApp.Login;
 
 import RestarantApp.Main;
+import RestarantApp.Network.APIService;
 import RestarantApp.Network.Api;
 import RestarantApp.Network.NetworkClient;
+import RestarantApp.Network.RetrofitClient;
 import RestarantApp.chat.rabbitmq_server.RabbitmqServer;
 import RestarantApp.chat.rabbitmq_stomp.Listener;
 import RestarantApp.database.SqliteConnection;
+import RestarantApp.menuClass.ViewCategoryController;
 import RestarantApp.model.Constants;
+import RestarantApp.model.LoginRequestAndResponse;
+import com.jfoenix.controls.JFXSnackbar;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,8 +36,13 @@ import javafx.stage.StageStyle;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.util.*;
 
@@ -51,8 +61,14 @@ public class LoginController {
     BorderPane rootPane;
     private NetworkClient networkClient;
     Connection connection;
+    JFXSnackbar jfxSnackbar;
     SqliteConnection sqliteConnection;
+    InetAddress inetAddress = null;
     public void initialize() {
+        String css = LoginController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
+        rootPane.getStylesheets().add(css);
+        jfxSnackbar = new JFXSnackbar(rootPane);
+
         networkClient = new NetworkClient();
         progressLoginIndicator.setVisible(false);
         progressLoginIndicator.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
@@ -64,6 +80,13 @@ public class LoginController {
         });
 
 
+        try {
+            inetAddress = InetAddress.getLocalHost();
+            sendIP();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        System.out.println("IP Address:- " + inetAddress.getHostAddress());
         txtFieldPassword.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -77,6 +100,38 @@ public class LoginController {
 
     }
 
+    public void sendIP()
+    {
+        APIService apiInterface = RetrofitClient.getClient().create(APIService.class);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("act","add");
+            jsonObject.put("current_ip", inetAddress.getHostAddress());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Call<LoginRequestAndResponse> customerDetailsCall = apiInterface.sendIp(jsonObject);
+        customerDetailsCall.enqueue(new Callback<LoginRequestAndResponse>() {
+            @Override
+            public void onResponse(Call<LoginRequestAndResponse> call, Response<LoginRequestAndResponse> response) {
+                if (response.isSuccessful())
+                {
+                    LoginRequestAndResponse loginRequestAndResponse = response.body();
+                    System.out.println(loginRequestAndResponse.getStatusCode());
+                    if (loginRequestAndResponse.getStatusCode().equals(Constants.Failure))
+                    {
+                        System.out.println(loginRequestAndResponse.getStatusCode());
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LoginRequestAndResponse> call, Throwable throwable) {
+
+            }
+        });
+    }
     public void login()
     {
         try {
@@ -90,14 +145,24 @@ public class LoginController {
             stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
             stage.show();
         }else if (txtFieldUsername.getText().equals("test") && txtFieldPassword.getText().equals("test")) {
+
             Stage stage;
             Parent root;
             stage=(Stage) btnLogin.getScene().getWindow();
             root = FXMLLoader.load(getClass().getResource("/RestarantApp/Billing/billingscene.fxml"));
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    jfxSnackbar.show("Login sucess",5000);
+                }
+            });
             stage.setTitle("Prawn And Crabs");
             Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
             stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
             stage.show();
+
+
+
         }else
         {
             Alert alert = new Alert(Alert.AlertType.WARNING);

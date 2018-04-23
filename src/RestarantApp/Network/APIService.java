@@ -127,4 +127,8 @@ public interface APIService {
     @POST("client_details_by_phone.php")
     Call<CustomerDetails> searchNumber(@Field("x") JSONObject object);
 
+    @FormUrlEncoded
+    @POST("current_ip.php")
+    Call<LoginRequestAndResponse> sendIp(@Field("x") JSONObject object);
+
 }
