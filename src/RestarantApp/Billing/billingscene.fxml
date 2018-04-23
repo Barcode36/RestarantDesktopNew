@@ -32,7 +32,7 @@
                         <Image url="@../images/yesball.png" />
                      </image>
                   </ImageView>
-                  <Button layoutX="1262.0" layoutY="59.0" mnemonicParsing="false" style="-fx-background-color: #f58220;" text="Logout" textFill="WHITE">
+                  <Button fx:id="btnLogout" layoutX="1262.0" layoutY="59.0" mnemonicParsing="false" onAction="#btnLogOut" style="-fx-background-color: #f58220;" text="Logout" textFill="WHITE">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
@@ -48,7 +48,7 @@
                         <Image url="@../images/notification.png" />
                      </image>
                   </ImageView>
-                  <ImageView fx:id="imgRefresh" onMouseClicked="#imgRefreshItem" fitHeight="30.0" fitWidth="87.0" layoutX="1051.0" layoutY="114.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fx:id="imgRefresh" fitHeight="30.0" fitWidth="87.0" layoutX="1051.0" layoutY="114.0" onMouseClicked="#imgRefreshItem" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/refres.png" />
                      </image>

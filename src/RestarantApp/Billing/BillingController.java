@@ -33,6 +33,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.print.Printer;
 import javafx.print.PrinterJob;
 import javafx.scene.Node;
@@ -50,6 +51,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
@@ -126,6 +128,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     ArrayList<String> checkBoxIndex = new ArrayList<>();
     String kotLastDate;
     ArrayList<String> kotList = new ArrayList();
+    @FXML
+    Button btnLogout;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //database connecttivity
@@ -2349,5 +2353,21 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 taxList();
             }
         });
+    }
+
+    public void btnLogOut(ActionEvent actionEvent) {
+        Stage stage;
+        stage=(Stage) btnLogout.getScene().getWindow();
+        Parent   root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("/RestarantApp/Login/Login.fxml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        stage.setTitle("Prawn And Crabs");
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
+        stage.show();
+
     }
 }
