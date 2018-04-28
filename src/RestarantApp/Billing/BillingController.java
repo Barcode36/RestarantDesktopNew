@@ -4,16 +4,14 @@ import RestarantApp.Network.APIService;
 import RestarantApp.Network.NetworkChangeListener;
 import RestarantApp.Network.NetworkConnection;
 import RestarantApp.Network.RetrofitClient;
-import RestarantApp.aaditionalClass.AutoCompleteTextField;
-import RestarantApp.aaditionalClass.EditingCell;
-import RestarantApp.aaditionalClass.NotesEditingCell;
-import RestarantApp.aaditionalClass.UtilsClass;
+import RestarantApp.aaditionalClass.*;
 import RestarantApp.chat.GetFromServerListener;
 import RestarantApp.chat.rabbitmq_server.RabbitmqServer;
 import RestarantApp.chat.rabbitmq_stomp.Listener;
 import RestarantApp.database.SqliteConnection;
 import RestarantApp.menuClass.ViewCategoryController;
 import RestarantApp.model.*;
+import com.jfoenix.controls.JFXSnackbar;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -26,6 +24,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -74,6 +73,7 @@ import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class BillingController implements Initializable, ItemSelectedListener, GetFromServerListener, NetworkChangeListener{
 
@@ -82,8 +82,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     @FXML
     ProgressIndicator itemLoadProgres;
     @FXML
-    AutoCompleteTextField txtFieldName,txtFieldId;
+    AutoCompleteTextField txtFieldId;
+    @FXML
+    AutoCompleteItemTextField txtFieldName;
     AutoCompleteTextField  autoCompleteTextField;
+    AutoCompleteItemTextField  autoCompleteItemTextField;
     Set<String> possibleWordSet = new HashSet<>();
     private AutoCompletionBinding<String> autoCompletionBinding;
     APIService retrofitService;
@@ -130,6 +133,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     ArrayList<String> kotList = new ArrayList();
     @FXML
     Button btnLogout;
+    JFXSnackbar jfxSnackbar;
+    int tableNo = 0,countEnter=0;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //database connecttivity
@@ -154,6 +159,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
         String css = BillingController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
         billingRootPane.getStylesheets().add(css);
+        jfxSnackbar = new JFXSnackbar(billingRootPane);
 
         KeyCombination ctrlX = KeyCodeCombination.keyCombination("Ctrl+N");
         billingRootPane.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -180,13 +186,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             }
         });
 
+
+
         new RabbitmqServer(this).execute();
         setTableDetails();
        NetworkConnection networkConnection = new NetworkConnection(BillingController.this);
-
          isConnectedNetwork =  networkConnection.isInternetReachable();
-        FileInputStream input = null;
-      /* if (isConnectedNetwork) {
+     /*   FileInputStream input = null;
+       if (isConnectedNetwork) {
 
             try {
                 input = new FileInputStream("RestarantApp/images/online.png");
@@ -201,9 +208,20 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 e.printStackTrace();
             }
         }
+
         Image image = new Image(input);
         imgConectionStatus.setImage(image);*/
+        Image image2;
+        if (isConnectedNetwork)
+        {
+             image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/online.png"));
 
+        }else
+        {
+             image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/offline.png"));
+
+        }
+        imgPlaceOrder.setImage(image2);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -217,6 +235,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
         autoCompleteTextField = new AutoCompleteTextField(this);
+        autoCompleteItemTextField = new AutoCompleteItemTextField(this);
 
         txtQty.textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -233,6 +252,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             }
         });
 
+
         txtFieldId.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue,
@@ -248,6 +268,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         txtFieldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
+                System.out.println(event.getCode());
                 if (event.getCode().equals(KeyCode.TAB))
                 {
                     Platform.runLater(new Runnable() {
@@ -256,9 +277,19 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             txtFieldName.requestFocus();
                         }
                     });
+                }else if (event.getCode().equals(KeyCode.ENTER)) {
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+
+                    addItemWhenEnter();
+                        }
+                    });
                 }
             }
         });
+
         txtFieldName.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -270,6 +301,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             txtQty.requestFocus();
                         }
                     });
+                }else if (event.getCode().equals(KeyCode.ENTER)) {
+
+
+                            addItemWhenEnter();
+
                 }
             }
         });
@@ -418,7 +454,12 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 
                 }
-
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        txtFieldId.requestFocus();
+                    }
+                });
             }
         });
 
@@ -440,8 +481,15 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             @Override
             public void addNewItem() {
 
-
-                tableList.add(loginRequestAndResponse.getName());
+                if (tableList.contains(loginRequestAndResponse.getName()))
+                {
+                    tableNo = tableNo + 1;
+                    String con = String.valueOf(tableNo);
+                    con = loginRequestAndResponse.getName()+"("+con+")";
+                    tableList.add(con);
+                }else {
+                    tableList.add(loginRequestAndResponse.getName());
+                }
                 listTableList.setItems(tableList);
                 modelObservableList = FXCollections.observableArrayList();
                 serialNo = 1;
@@ -471,6 +519,35 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     }
 
+    private void addItemWhenEnter() {
+
+            for (int j = 0; j < billingItemDetails.size(); j++) {
+                ItemListRequestAndResponseModel.item_list item_list = billingItemDetails.get(j);
+                if (item_list.getItem_name().equals(txtFieldId.getText().trim())) {
+                    selectedItem = item_list;
+
+                    txtFieldId.setText(item_list.getShort_code());
+                    txtFieldId.hidePopUp();
+
+                } else if (item_list.getShort_code().equals(txtFieldId.getText().trim())) {
+                    selectedItem = item_list;
+                    System.out.println("get item name  " + item_list.getItem_name());
+                    txtFieldName.setText(item_list.getItem_name());
+                    txtFieldName.hidePopUp();
+
+
+                }
+            }
+
+            if (selectedTable != null) {
+                addItem();
+            } else {
+                Constants.showAlert(Alert.AlertType.WARNING, "Warning", "Warning", "Please Select Table");
+            }
+
+
+    }
+
 
     public void nertworkChanged()
     {
@@ -478,14 +555,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         if (isConnectedNetwork) {
 
             try {
-                input = new FileInputStream("RestarantApp/images/online.png");
+                input = new FileInputStream("src/RestarantApp/images/online.png");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }else
         {
             try {
-                input = new FileInputStream("RestarantApp/images/offline.png");
+                input = new FileInputStream("src/RestarantApp/images/offline.png");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -775,7 +852,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         ItemListRequestAndResponseModel.item_list item_list = listRequestAndResponseModel.getItem_list().get(j);
                         itemName.add(item_list.getItem_name());
                         itemId.add(item_list.getShort_code());
-
                         billingItemDetails.add(item_list);
 
                     }
@@ -1811,7 +1887,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 placeOrder.enqueue(new Callback<RequestAndResponseModel>() {
                     @Override
                     public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
-                        itemLoadProgres.setVisible(false);
+
                         if (response.isSuccessful())
                         {
                             RequestAndResponseModel requestAndResponseModel = response.body();
@@ -1824,18 +1900,32 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                 }
 
                                 tableBill.setEditable(false);
-                                FileInputStream input = null;
+                                final FileInputStream[] input = {null};
 
-                                try {
-                                    input = new FileInputStream("src/RestarantApp/images/closesale.png");
-                                } catch (FileNotFoundException e) {
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+//                                try {
+
+//                                    input[0] = new FileInputStream("/RestarantApp/images/closesale.png");
+
+                                    Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/closesale.png"));
+                                    imgPlaceOrder.setImage(image2);
+//                                    jfxSnackbar.show("Image show",5000);
+                              /*  } catch (FileNotFoundException e) {
                                     e.printStackTrace();
-                                }
-                                Image image = new Image(input);
-                                imgPlaceOrder.setImage(image);
+                                    jfxSnackbar.show("Image not show",5000);
+                                }*/
+                                /*Image image = new Image(input[0]);
+                                imgPlaceOrder.setImage(image);*/
                                 btnAddItem.setOnMouseClicked(null);
+                                itemLoadProgres.setVisible(false);
+                                    }
+                                });
 
                             }
+
                             System.out.println("order id----->"+requestAndResponseModel.getOrder_id());
 
                         }
@@ -2164,7 +2254,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         "        Thavalakuppam, Pondicherry-605007.\n\n"
                         +" GST NO:34GWGPS3087B1ZE                  \n"
                         +" Date:"+currentDate+"       Time:"+currentTime+"\n"
-                        +" Table No:"+selectedTable+"       KOT:"+String.join(",",s)+         "\n\n";
+                        +" Table No:"+selectedTable+                "\n\n";
+//                        +" Table No:"+selectedTable+"       KOT:"+String.join(",",s)+         "\n\n";
 
 
         String  listItem = "            List of Items            \n"
@@ -2309,7 +2400,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         if (list.getActive().equals("1"))
                         {
                             int status = Integer.parseInt(list.getActive());
-                            System.out.println("check database---->"+list.getName());
                            if (sqliteConnection.checkDatabase(list.getName()) == 0)
                            {
                                sqliteConnection.insertTableData(list.getName(),status);
@@ -2370,4 +2460,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         stage.show();
 
     }
+
+    
 }

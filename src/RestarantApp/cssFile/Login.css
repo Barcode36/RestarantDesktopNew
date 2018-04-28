@@ -97,3 +97,6 @@
 	-fx-background-size:cover;
 	-fx-background-attachment:fixed;
 }
+.combo-box .arrow, .combo-box .arrow-button{
+	-fx-background-color: transparent;
+}

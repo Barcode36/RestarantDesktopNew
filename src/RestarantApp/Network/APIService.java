@@ -131,4 +131,12 @@ public interface APIService {
     @POST("current_ip.php")
     Call<LoginRequestAndResponse> sendIp(@Field("x") JSONObject object);
 
+    @FormUrlEncoded
+    @POST("customer_list.php")
+    Call<CustomerDetails> getCustomerList(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("search_customer.php")
+    Call<CustomerDetails> getSearchResult(@Field("x") JSONObject object);
+
 }

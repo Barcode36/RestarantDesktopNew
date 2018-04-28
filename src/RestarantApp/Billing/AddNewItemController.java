@@ -245,13 +245,14 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                         if (loginRequestAndResponse.getCustomer_id() != null) {
                             LoginRequestAndResponse customer_id = LoginRequestAndResponse.getInstance();
                             customer_id.setCustomer_id(loginRequestAndResponse.getCustomer_id());
-                           /* if (txtName.getText().isEmpty()) {
-                                customer_id.setName("Parcel");
+                            if (txtName.getText().isEmpty())
+                            {
+                                customer_id.setName(String.valueOf(selectTable.getSelectionModel().getSelectedItem()));
                             } else {
                                 customer_id.setName(txtName.getText());
-                            }*/
+                            }
 
-                            customer_id.setName(txtName.getText());
+//                            customer_id.setName(txtName.getText());
                             customer_id.setMobile_num(txtMobileNumber.getText());
                             customer_id.setCustomer_address( " ");
                             customer_id.setCustomer_email(txtMailId.getText());

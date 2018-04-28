@@ -36,9 +36,9 @@ public class DashBoardController  {
     TreeView lstMenu;
     @FXML
     AnchorPane subCategory,rootPane;
-    String root = "Root",monthly_report ="Monthly Report",category ="Category",item = "Items",add_category = "Add Category",view_category ="View Category",variety ="Variety",add_varity = "Add variety",view_varity ="View variety"
+    String root = "Root",monthly_report ="Monthly Report",category ="Category",sub_category ="Sub Category",item = "Items",add_category = "Add Category",view_category ="View Category",variety ="Variety",add_sub_category = "Add Sub Category",view_sub_category ="View sub Category",add_varity = "Add variety",view_varity ="View variety"
             ,add_Item ="Add Item",list_item = "List Item",tax = "Tax",add_tax = "Add Tax",list_tax = "List Tax",combo = " Combo Items",add_combo = "Add Combo Items",
-            combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table";
+            combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table",customer = "Customer",add_customer="Add Customer",view_customer = "View Customer";
 
 
     public void initialize() {
@@ -47,16 +47,22 @@ public class DashBoardController  {
 
         TreeItem<String> monthlyNode = new TreeItem<>(monthly_report);
         TreeItem<String> categoryNode = new TreeItem<>(category);
+        TreeItem<String> sub_categoryNode = new TreeItem<>(sub_category);
         TreeItem<String> varityNode = new TreeItem<>(variety);
         TreeItem<String> itemNode = new TreeItem<>(item);
         TreeItem<String> taxNode = new TreeItem<>(tax);
         TreeItem<String> comboNode = new TreeItem<>(combo);
         TreeItem<String> tableNode = new TreeItem<>(table);
-        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode);
+        TreeItem<String> customerNode = new TreeItem<>(customer);
+        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode);
 
         TreeItem<String> nodeItemA1 = new TreeItem<>(add_category);
         TreeItem<String> nodeItemA2 = new TreeItem<>(view_category);
         categoryNode.getChildren().addAll(nodeItemA1, nodeItemA2);
+
+        TreeItem<String> nodesubItemA1 = new TreeItem<>(add_sub_category);
+        TreeItem<String> nodesubItemA2 = new TreeItem<>(view_sub_category);
+        sub_categoryNode.getChildren().addAll(nodesubItemA1, nodesubItemA2);
 
         TreeItem<String> nodeAddVarity = new TreeItem<>(add_varity);
         TreeItem<String> nodeListVarity = new TreeItem<>(view_varity);
@@ -77,6 +83,10 @@ public class DashBoardController  {
         TreeItem<String> addTable = new TreeItem<>(add_table);
         TreeItem<String> tableList = new TreeItem<>(list_table);
         tableNode.getChildren().addAll(addTable,tableList);
+
+        TreeItem<String> addCustomer = new TreeItem<>(add_customer);
+        TreeItem<String> viewCustomer = new TreeItem<>(view_customer);
+        customerNode.getChildren().addAll(addCustomer,viewCustomer);
 
         treeItemRoot.setExpanded(true);
         lstMenu.setShowRoot(false);
@@ -126,6 +136,12 @@ public class DashBoardController  {
                 }else if (selectedItem.getValue().equals(view_varity))
                 {
                     changePane("/RestarantApp/menuFxml/variety_list_controller.fxml");
+                }else if (selectedItem.getValue().equals(add_customer))
+                {
+                    changePane("/RestarantApp/menuFxml/add_new_customer.fxml");
+                }else if (selectedItem.getValue().equals(view_customer))
+                {
+                    changePane("/RestarantApp/menuFxml/customer_list_scene.fxml");
                 }
             }
         });
