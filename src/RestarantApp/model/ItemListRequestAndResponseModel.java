@@ -9,8 +9,15 @@ public class ItemListRequestAndResponseModel {
     ArrayList<item_list>item_list = new ArrayList<>();
     ArrayList<list>list = new ArrayList<>();
 
-    String itemCategoryList,Status_code,Success ;
+    String itemCategoryList,Status_code,Success,itemSubCategoryList;
 
+    public String getItemSubCategoryList() {
+        return itemSubCategoryList;
+    }
+
+    public void setItemSubCategoryList(String itemSubCategoryList) {
+        this.itemSubCategoryList = itemSubCategoryList;
+    }
 
     public String getComboList() {
         return comboList;
@@ -194,6 +201,15 @@ public class ItemListRequestAndResponseModel {
     {
         String item_id,item_name,description,price,image,short_code;
         List<cat_list> cat_list;
+        List<sub_cat_list> sub_cat_list;
+
+        public List<ItemListRequestAndResponseModel.sub_cat_list> getSub_cat_list() {
+            return sub_cat_list;
+        }
+
+        public void setSub_cat_list(List<ItemListRequestAndResponseModel.sub_cat_list> sub_cat_list) {
+            this.sub_cat_list = sub_cat_list;
+        }
 
         public String getShort_code() {
             return short_code;
@@ -270,6 +286,26 @@ public class ItemListRequestAndResponseModel {
 
         public void setCat_name(String cat_name) {
             this.cat_name = cat_name;
+        }
+    }
+
+    public class sub_cat_list{
+        String sub_cat_id,sub_cat_name;
+
+        public String getSub_cat_id() {
+            return sub_cat_id;
+        }
+
+        public void setSub_cat_id(String sub_cat_id) {
+            this.sub_cat_id = sub_cat_id;
+        }
+
+        public String getSub_cat_name() {
+            return sub_cat_name;
+        }
+
+        public void setSub_cat_name(String sub_cat_name) {
+            this.sub_cat_name = sub_cat_name;
         }
     }
 

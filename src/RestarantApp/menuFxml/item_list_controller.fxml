@@ -35,6 +35,10 @@
                             <cellValueFactory><PropertyValueFactory property="itemCategoryList" />
                             </cellValueFactory>
                         </TableColumn>
+                        <TableColumn fx:id="itemSubCatListcolm" editable="false" prefWidth="97.0" sortable="false" text="Sub Category List">
+                            <cellValueFactory><PropertyValueFactory property="itemSubCategoryList" />
+                            </cellValueFactory>
+                        </TableColumn>
                         <TableColumn fx:id="itemImagecolm" editable="false" prefWidth="153.0" sortable="false" text="Image">
                             <cellValueFactory><PropertyValueFactory property="itemImage" />
                             </cellValueFactory>

@@ -149,6 +149,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                 System.out.println("Connection  successfull");
                                      sqliteConnection = new SqliteConnection();
                                      kotLastDate = sqliteConnection.getLastKOTDATE();
+                                     getTableList();
             }
             }
         });
@@ -221,12 +222,12 @@ public class BillingController implements Initializable, ItemSelectedListener, G
              image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/offline.png"));
 
         }
-        imgPlaceOrder.setImage(image2);
+        imgConectionStatus.setImage(image2);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 getData();
-                getTableList();
+
                 taxList();
             }
         });

@@ -2,10 +2,12 @@ package RestarantApp.Dashboard;
 
 import RestarantApp.Main;
 import com.jfoenix.controls.JFXSnackbar;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +16,7 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -40,7 +43,8 @@ public class DashBoardController  {
             ,add_Item ="Add Item",list_item = "List Item",tax = "Tax",add_tax = "Add Tax",list_tax = "List Tax",combo = " Combo Items",add_combo = "Add Combo Items",
             combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table",customer = "Customer",add_customer="Add Customer",view_customer = "View Customer";
 
-
+    @FXML
+    Button btnLogout;
     public void initialize() {
 
         TreeItem<String> treeItemRoot = new TreeItem<> (root);
@@ -142,6 +146,12 @@ public class DashBoardController  {
                 }else if (selectedItem.getValue().equals(view_customer))
                 {
                     changePane("/RestarantApp/menuFxml/customer_list_scene.fxml");
+                }else if (selectedItem.getValue().equals(add_sub_category))
+                {
+                    changePane("/RestarantApp/menuFxml/subcatagoryscene.fxml");
+                }else if (selectedItem.getValue().equals(view_sub_category))
+                {
+                    changePane("/RestarantApp/menuFxml/view_sub_catagory_scene.fxml");
                 }
             }
         });
@@ -169,6 +179,11 @@ public class DashBoardController  {
 
     public void changePane(String urlPath)
     {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource(urlPath));
         StackPane cmdPane = null;
         try {
@@ -184,9 +199,24 @@ public class DashBoardController  {
         subCategory.getChildren().setAll(cmdPane);
         System.out.println(subCategory.getWidth());
         System.out.println(subCategory.getHeight());
-
+            }
+        });
     }
 
 
+    public void btnLogOut(ActionEvent actionEvent) {
 
+        Stage stage;
+        stage=(Stage) btnLogout.getScene().getWindow();
+        Parent   root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("/RestarantApp/Login/Login.fxml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        stage.setTitle("Prawn And Crabs");
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
+        stage.show();
+    }
 }

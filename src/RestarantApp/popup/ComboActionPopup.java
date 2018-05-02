@@ -105,16 +105,25 @@ public class ComboActionPopup implements Initializable {
         this.itemListRequestAndResponseModel = item;
         if (view.equals("view"))
         {
-            anchorView.setVisible(true);
-            anchorEdit.setVisible(false);
-            labComboId.setText(item.getId());
-            labComboName.setText(item.getName());
-            labComboList.setText(item.getComboList());
-            labComboList.setWrapText(true);
-            labComboList.setMaxWidth(300);
-            labComboStatus.setText(item.getStatus());
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    anchorView.setVisible(true);
+                    anchorEdit.setVisible(false);
+                    labComboId.setText(item.getId());
+                    labComboName.setText(item.getName());
+                    labComboList.setText(item.getComboList());
+                    labComboList.setWrapText(true);
+                    labComboList.setMaxWidth(300);
+                    labComboStatus.setText(item.getStatus());
+                }
+            });
+
         }else if (view.equals("edit"))
         {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
             anchorView.setVisible(false);
             anchorEdit.setVisible(true);
             editComboName.setText(item.getName());
@@ -136,6 +145,9 @@ public class ComboActionPopup implements Initializable {
                     editCheckItemList.getCheckModel().check(editCheckItemList.getItems().indexOf(itemList.get(i).trim()));
                 }
             }
+                }
+            });
+
 
         }
     }

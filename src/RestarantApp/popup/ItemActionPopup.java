@@ -84,6 +84,11 @@ public class ItemActionPopup implements Initializable {
 
     public void setItemsDetails(ItemListRequestAndResponseModel msg,String from)
     {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+
+
         if (from.equals("view")) {
             ancEditItem.setVisible(false);
             ancViewItem.setVisible(true);
@@ -94,7 +99,7 @@ public class ItemActionPopup implements Initializable {
             labItemCategory.setText(msg.getItemCategoryList());
             Image image = new Image(Constants.ITEM_BASE_URL + msg.getItemImage());
             imgItemViewIamge.setImage(image);
-            System.out.println("hello message----------->" + msg.getItemName());
+
         }else if (from.equals("edit"))
         {
             ancEditItem.setVisible(true);
@@ -110,6 +115,8 @@ public class ItemActionPopup implements Initializable {
 
             itemList = new ArrayList<String>(Arrays.asList(msg.getItemCategoryList().split(",")));
         }
+            }
+        });
     }
 
     public void closeEditButton(MouseEvent mouseEvent) {

@@ -58,7 +58,7 @@ public class ItemListController {
     TableView<ItemListRequestAndResponseModel> tableIndex;
 
     @FXML
-    TableColumn itemIdColm,itemNameColm,itemDesColm,itemImagecolm,itemPricecolm,itemCatListcolm;
+    TableColumn itemIdColm,itemNameColm,itemDesColm,itemImagecolm,itemPricecolm,itemCatListcolm,itemSubCatListcolm;
     // The table's data
     ObservableList<ItemListRequestAndResponseModel> data;
 //    @FXML
@@ -99,6 +99,9 @@ public class ItemListController {
         );
         itemCatListcolm.setCellValueFactory(
                 new PropertyValueFactory<ItemListRequestAndResponseModel,String>("itemCategoryList")
+        );
+        itemSubCatListcolm.setCellValueFactory(
+                new PropertyValueFactory<ItemListRequestAndResponseModel,String>("itemSubCategoryList")
         );
         tableIndex.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableIndex.getStylesheets().add("/RestarantApp/cssFile/Login.css");
@@ -259,7 +262,6 @@ public class ItemListController {
             @Override
             public void handle(MouseEvent event) {
                 ItemListRequestAndResponseModel item = tableIndex.getSelectionModel().getSelectedItem();
-                System.out.println(Constants.ITEM_BASE_URL + item.getItemImage());
                 Parent root;
                 try {
                     FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/RestarantApp/popup/item_popup.fxml"));
@@ -360,7 +362,9 @@ public class ItemListController {
                         itemList.setItemShortCode(list.getShort_code());
                         itemList.setItemDescription(list.getDescription());
                         ArrayList itemCatList = new ArrayList();
-                        String listCat = "null";
+                        ArrayList itemSubCatList = new ArrayList();
+
+                        String listCat = "null",subCatList= " null";
                         if (list.getCat_list() != null) {
                             for (int j = 0; j < list.getCat_list().size(); j++) {
                                 ItemListRequestAndResponseModel.cat_list cat_list = list.getCat_list().get(j);
@@ -370,9 +374,22 @@ public class ItemListController {
                             listCat = listCat.substring(1, listCat.length()-1);
                         }else
                         {
+
                             itemCatList.add("null");
                         }
+                        if (list.getSub_cat_list() != null) {
+                            for (int j = 0; j < list.getSub_cat_list().size(); j++) {
+                                ItemListRequestAndResponseModel.sub_cat_list cat_list = list.getSub_cat_list().get(j);
+                                itemSubCatList.add(cat_list.getSub_cat_name());
+                            }
+                            subCatList = itemSubCatList.toString();
+                            subCatList = subCatList.substring(1, subCatList.length()-1);
+                        }else
+                        {
+                            itemSubCatList.add("null");
+                        }
                         itemList.setItemCategoryList(listCat);
+                        itemList.setItemSubCategoryList(subCatList );
                         itemList.setItemImage(list.getImage());
                         data.add(itemList);
                         dummyCount = dummyCount + 1;

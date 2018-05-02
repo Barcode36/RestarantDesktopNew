@@ -171,7 +171,31 @@ public class RequestAndResponseModel {
 
     public static class cat_list {
 
-        String Cat_id, Cat_name;
+        String Cat_id, Cat_name,Sub_Cat_id,Sub_Cat_name,Image;
+
+        public String getSub_Cat_id() {
+            return Sub_Cat_id;
+        }
+
+        public void setSub_Cat_id(String sub_Cat_id) {
+            Sub_Cat_id = sub_Cat_id;
+        }
+
+        public String getSub_Cat_name() {
+            return Sub_Cat_name;
+        }
+
+        public void setSub_Cat_name(String sub_Cat_name) {
+            Sub_Cat_name = sub_Cat_name;
+        }
+
+        public String getImage() {
+            return Image;
+        }
+
+        public void setImage(String image) {
+            Image = image;
+        }
 
         public String getCat_id() {
             return Cat_id;

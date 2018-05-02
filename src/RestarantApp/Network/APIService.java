@@ -48,6 +48,10 @@ public interface APIService {
     Call<RequestAndResponseModel> categoryList();
 
     @FormUrlEncoded
+    @POST("cat_subcat_list.php")
+    Call<SubCatagoryList> getSubCatagoryList(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
     @POST("item_add.php")
     Call<RequestAndResponseModel> sendItemDetails(@Field("x") JSONObject object);
 
@@ -138,5 +142,26 @@ public interface APIService {
     @FormUrlEncoded
     @POST("search_customer.php")
     Call<CustomerDetails> getSearchResult(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("sub_category_add.php")
+    Call<RequestAndResponseModel> addSubCatagory(@Field("x") JSONObject object);
+
+
+    @FormUrlEncoded
+    @POST("sub_category_view.php")
+    Call<RequestAndResponseModel> viewSubCategory(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("sub_category_delete.php")
+    Call<RequestAndResponseModel> deleteSubCategory(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("sub_category_edit.php")
+    Call<RequestAndResponseModel> editSubCategory(@Field("x") JSONObject object);
+
+
+    @POST("sub_category_list.php")
+    Call<RequestAndResponseModel> getSubCatagoryList();
 
 }

@@ -59,10 +59,18 @@ public class CategoryController  {
             @Override
             public void handle(javafx.scene.input.MouseEvent event) {
                 try {
-                        bufferedImage = ImageIO.read(UtilsClass.selectImage());
-                    if (bufferedImage != null){
-                        Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-                        imgCategoryIamge.setImage(image);
+                    File file = UtilsClass.selectImage();
+                    if (file != null) {
+                        double bytes = file.length();
+                        double kilobytes = (bytes / 1024);
+                        System.out.println("file size-->" + String.valueOf(kilobytes));
+                        if (kilobytes < 250) {
+                            bufferedImage = ImageIO.read(file);
+                            if (bufferedImage != null) {
+                                Image image = SwingFXUtils.toFXImage(bufferedImage, null);
+                                imgCategoryIamge.setImage(image);
+                            }
+                        }
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(CategoryController.class.getName()).log(Level.SEVERE, null, ex);
@@ -133,7 +141,13 @@ public class CategoryController  {
 
             @Override
             public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
-
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        jfxSnackbar.show(throwable.getMessage(),5000);
+                        progressCategory.setVisible(false);
+                    }
+                });
             }
         });
 

@@ -39,6 +39,7 @@ private SortedSet<String> entries = null;
         {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String s2) {
+                System.out.println("entry size--->>"+entries.size());
                 if (getText().length() == 0)
                 {
                     entriesPopup.hide();
@@ -51,11 +52,17 @@ private SortedSet<String> entries = null;
                     if (Character.isUpperCase(ch))
                     {
                         ArrayList<String> arrayList =new ArrayList();
+                        ArrayList<String> tempArray =new ArrayList();
                         arrayList.addAll(entries);
-                        str = str.toLowerCase();
-                        for (int  i= 0 ; i < arrayList.size() ; i++)
+                        for (int i= 0 ; i < arrayList.size() ; i ++)
                         {
-                            String  s1 = arrayList.get(i);
+                            String s1 = arrayList.get(i).toLowerCase();
+                            tempArray.add(s1);
+                        }
+                        str = str.toLowerCase();
+                        for (int  i= 0 ; i < tempArray.size() ; i++)
+                        {
+                            String  s1 = tempArray.get(i);
                             if (s1.contains(str))
                             {
                                 searchResult.add(s1);
@@ -67,12 +74,18 @@ private SortedSet<String> entries = null;
                     }else if (Character.isLowerCase(ch))
                     {
                         ArrayList<String> arrayList =new ArrayList();
+                        ArrayList<String> tempArray =new ArrayList();
                         arrayList.addAll(entries);
                         str = str.toUpperCase();
-                        String str1 = str.toLowerCase();
-                        for (int  i= 0 ; i < arrayList.size() ; i++)
+                        for (int i= 0 ; i < arrayList.size() ; i ++)
                         {
-                            String  s1 = arrayList.get(i);
+                            String s1 = arrayList.get(i).toLowerCase();
+                            tempArray.add(s1);
+                        }
+                        String str1 = str.toLowerCase();
+                        for (int  i= 0 ; i < tempArray.size() ; i++)
+                        {
+                            String  s1 = tempArray.get(i);
                             if (s1.contains(str))
                             {
                                 searchResult.add(s1);

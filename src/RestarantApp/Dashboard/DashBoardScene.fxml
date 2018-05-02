@@ -48,6 +48,6 @@
             </image>
         </ImageView>
         <Hyperlink layoutX="1144.0" layoutY="64.0" style="-fx-font-size: 14;" text="dummy @gmail.com" textFill="WHITE" />
-        <Button layoutX="1290.0" layoutY="62.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="65.0" style="-fx-background-color: orange; -fx-background-radius: 10px;" text="Logout" />
+        <Button fx:id="btnLogout" onAction="#btnLogOut" layoutX="1290.0" layoutY="62.0" mnemonicParsing="false" prefHeight="32.0" prefWidth="65.0" style="-fx-background-color: orange; -fx-background-radius: 10px;" text="Logout" />
     </children>
 </AnchorPane>

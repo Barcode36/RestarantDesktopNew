@@ -275,16 +275,18 @@ public class ComboListController implements Initializable {
                         ItemListRequestAndResponseModel itemList = new ItemListRequestAndResponseModel();
                         itemList.setId(list.getId());
                         itemList.setName(list.getName());
-                        list.setItem_list(list.getItem_list().substring(1, list.getItem_list().length()-1));
+//                        list.setItem_list(list.getItem_list().substring(1, list.getItem_list().length()-1));
                         ArrayList<String> itemListCombo = new ArrayList<String>(Arrays.asList(list.getItem_list().split(",")));
                         ArrayList itemListComboDetails = new ArrayList();
                         for (int j=0;j<itemListCombo.size();j++)
                         {
+                            if (!itemListCombo.get(j).isEmpty()) {
 
-                            Integer itemId =Integer.valueOf(itemListCombo.get(j).trim());
-                            String itemName = itemDetails.get(itemId);
-                            itemListComboDetails.add(itemName);
-                            System.out.println(itemName);
+                                Integer itemId = Integer.valueOf(itemListCombo.get(j).trim());
+                                String itemName = itemDetails.get(itemId);
+                                itemListComboDetails.add(itemName);
+                                System.out.println(itemName);
+                            }
                         }
                         String item = itemListComboDetails.toString();
                         itemList.setComboList(item.substring(1,item.length()-1));
