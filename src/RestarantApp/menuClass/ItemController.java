@@ -132,9 +132,9 @@ public class ItemController {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue,
                                 String newValue) {
-                if (!newValue.matches("\\d*")) {
+               /* if (!newValue.matches("\\d*")) {
                     txtItemId.setText(newValue.replaceAll("[^\\d]", ""));
-                }
+                }*/
             }
         });
 
