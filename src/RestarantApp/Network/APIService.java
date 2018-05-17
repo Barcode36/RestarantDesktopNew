@@ -164,4 +164,9 @@ public interface APIService {
     @POST("sub_category_list.php")
     Call<RequestAndResponseModel> getSubCatagoryList();
 
+
+    @FormUrlEncoded
+    @POST("notification_add.php")
+    Call<RequestAndResponseModel> sendNotification(@Field("x") JSONObject object);
+
 }

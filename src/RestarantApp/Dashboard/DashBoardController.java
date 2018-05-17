@@ -41,7 +41,8 @@ public class DashBoardController  {
     AnchorPane subCategory,rootPane;
     String root = "Root",monthly_report ="Monthly Report",category ="Category",sub_category ="Sub Category",item = "Items",add_category = "Add Category",view_category ="View Category",variety ="Variety",add_sub_category = "Add Sub Category",view_sub_category ="View sub Category",add_varity = "Add variety",view_varity ="View variety"
             ,add_Item ="Add Item",list_item = "List Item",tax = "Tax",add_tax = "Add Tax",list_tax = "List Tax",combo = " Combo Items",add_combo = "Add Combo Items",
-            combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table",customer = "Customer",add_customer="Add Customer",view_customer = "View Customer";
+            combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table",customer = "Customer",add_customer="Add Customer",view_customer = "View Customer"
+            ,notification="Notification";
 
     @FXML
     Button btnLogout;
@@ -58,7 +59,8 @@ public class DashBoardController  {
         TreeItem<String> comboNode = new TreeItem<>(combo);
         TreeItem<String> tableNode = new TreeItem<>(table);
         TreeItem<String> customerNode = new TreeItem<>(customer);
-        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode);
+        TreeItem<String> notificationNode = new TreeItem<>(notification);
+        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode,notificationNode);
 
         TreeItem<String> nodeItemA1 = new TreeItem<>(add_category);
         TreeItem<String> nodeItemA2 = new TreeItem<>(view_category);
@@ -152,6 +154,9 @@ public class DashBoardController  {
                 }else if (selectedItem.getValue().equals(view_sub_category))
                 {
                     changePane("/RestarantApp/menuFxml/view_sub_catagory_scene.fxml");
+                }else if (selectedItem.getValue().equals(notification))
+                {
+                    changePane("/RestarantApp/notification/notification.fxml");
                 }
             }
         });

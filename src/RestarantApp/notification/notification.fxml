@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane fx:id="catRootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="325.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.notification.NotificationController">
+    <children>
+      <AnchorPane layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="325.0" prefWidth="450.0" style="-fx-background-color: f68220; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);">
+         <children>
+            <ProgressIndicator fx:id="progressSendNoti" layoutX="280.0" layoutY="227.0" progress="0.0" visible="false" />
+            <ImageView fitHeight="54.0" fitWidth="168.0" layoutX="145.0" layoutY="36.0" pickOnBounds="true" preserveRatio="true" AnchorPane.topAnchor="36.0">
+               <image>
+                  <Image url="@../images/noti.png" />
+               </image>
+            </ImageView>
+            <Pane layoutX="420.0" prefHeight="30.0" prefWidth="30.0" style="-fx-border-color: #f5ad70;" />
+            <ImageView fitHeight="25.0" fitWidth="25.0" layoutX="423.0" layoutY="3.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/close.png" />
+               </image>
+            </ImageView>
+            <Pane layoutX="388.0" prefHeight="30.0" prefWidth="30.0" style="-fx-border-color: #f5ad70;">
+               <children>
+                  <ImageView fitHeight="16.0" fitWidth="25.0" layoutX="7.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/min.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </Pane>
+            <TextArea fx:id="txtFieldMessage" layoutX="68.0" layoutY="151.0" prefHeight="104.0" prefWidth="312.0" promptText="Enter your message" />
+            <ImageView fitHeight="30.0" fitWidth="111.0" layoutX="186.0" layoutY="270.0" onMouseClicked="#imgSendNotification" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/send.png" />
+               </image>
+            </ImageView>
+            <TextField fx:id="txtFiledTitle" layoutX="68.0" layoutY="109.0" prefHeight="30.0" prefWidth="312.0" promptText="Title" />
+         </children>
+      </AnchorPane>
+    </children>
+</StackPane>
