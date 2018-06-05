@@ -39,14 +39,17 @@ public class DashBoardController  {
     TreeView lstMenu;
     @FXML
     AnchorPane subCategory,rootPane;
-    String root = "Root",monthly_report ="Monthly Report",category ="Category",sub_category ="Sub Category",item = "Items",add_category = "Add Category",view_category ="View Category",variety ="Variety",add_sub_category = "Add Sub Category",view_sub_category ="View sub Category",add_varity = "Add variety",view_varity ="View variety"
+    String root = "Root",monthly_report ="Reports",category ="Category",sub_category ="Sub Category",item = "Items",add_category = "Add Category",view_category ="View Category",variety ="Variety",add_sub_category = "Add Sub Category",view_sub_category ="View sub Category",add_varity = "Add variety",view_varity ="View variety"
             ,add_Item ="Add Item",list_item = "List Item",tax = "Tax",add_tax = "Add Tax",list_tax = "List Tax",combo = " Combo Items",add_combo = "Add Combo Items",
             combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table",customer = "Customer",add_customer="Add Customer",view_customer = "View Customer"
-            ,notification="Notification";
+            ,notification="Notification",offers = "Offer",onBill = "OnBill",onItem= "OnItem",gallery = "Gallery", vip_gallery = "VIP Gallery"
+            ,video_gallery = "Video Gallery",list_vip_image = "List VIP Image",list_video = "List Video";
 
     @FXML
     Button btnLogout;
     public void initialize() {
+
+        changePane("/RestarantApp/menuFxml/report_scene.fxml");
 
         TreeItem<String> treeItemRoot = new TreeItem<> (root);
 
@@ -60,7 +63,9 @@ public class DashBoardController  {
         TreeItem<String> tableNode = new TreeItem<>(table);
         TreeItem<String> customerNode = new TreeItem<>(customer);
         TreeItem<String> notificationNode = new TreeItem<>(notification);
-        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode,notificationNode);
+        TreeItem<String> offerNode= new TreeItem<>(offers);
+        TreeItem<String> galleryNode = new TreeItem<>(gallery);
+        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode,notificationNode,offerNode,galleryNode);
 
         TreeItem<String> nodeItemA1 = new TreeItem<>(add_category);
         TreeItem<String> nodeItemA2 = new TreeItem<>(view_category);
@@ -94,6 +99,16 @@ public class DashBoardController  {
         TreeItem<String> viewCustomer = new TreeItem<>(view_customer);
         customerNode.getChildren().addAll(addCustomer,viewCustomer);
 
+        TreeItem<String> onBillNode = new TreeItem<>(onBill);
+        TreeItem<String> onBillItem = new TreeItem<>(onItem);
+        offerNode.getChildren().addAll(onBillNode,onBillItem);
+
+        TreeItem<String> vipGallery = new TreeItem<>(vip_gallery);
+        TreeItem<String> listVipImage = new TreeItem<>(list_vip_image);
+        TreeItem<String> videoGallery = new TreeItem<>(video_gallery);
+        TreeItem<String> listVideo = new TreeItem<>(list_video);
+        galleryNode.getChildren().addAll(vipGallery,listVipImage,videoGallery,listVideo);
+
         treeItemRoot.setExpanded(true);
         lstMenu.setShowRoot(false);
         lstMenu.setRoot(treeItemRoot);
@@ -105,7 +120,7 @@ public class DashBoardController  {
                 System.out.println("Selected Text : " + selectedItem.getValue());
                 if (selectedItem.getValue().equals(monthly_report))
                 {
-
+                    changePane("/RestarantApp/menuFxml/report_scene.fxml");
                 }else if (selectedItem.getValue().equals(add_category))
                 {
                     changePane("/RestarantApp/menuFxml/CategoryScene.fxml");
@@ -157,6 +172,18 @@ public class DashBoardController  {
                 }else if (selectedItem.getValue().equals(notification))
                 {
                     changePane("/RestarantApp/notification/notification.fxml");
+                }else if (selectedItem.getValue().equals(vip_gallery))
+                {
+                    changePane("/RestarantApp/menuFxml/uploadimage.fxml");
+                }else if (selectedItem.getValue().equals(video_gallery))
+                {
+                    changePane("/RestarantApp/menuFxml/uploadvideo.fxml");
+                }else if (selectedItem.getValue().equals(list_vip_image))
+                {
+                    changePane("/RestarantApp/menuFxml/vip_image_scene.fxml");
+                }else if (selectedItem.getValue().equals(list_video))
+                {
+                    changePane("/RestarantApp/menuFxml/video_list_scene.fxml");
                 }
             }
         });
@@ -164,7 +191,7 @@ public class DashBoardController  {
        /* names.addAll(
                 "Monthly Report", "Category", "Items","Category List"
         );
-        lstMenu.setItems(names);
+        lstMenu.setItems(names);0
         lstMenu.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {

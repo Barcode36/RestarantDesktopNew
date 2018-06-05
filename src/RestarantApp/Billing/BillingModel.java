@@ -1,12 +1,14 @@
 package RestarantApp.Billing;
 
+import javafx.beans.property.BooleanProperty;
+
 import java.util.ArrayList;
 
 public class BillingModel {
 
-    int s_no;
+    int s_no,kot_no;
     String item_name,notes,quantity,rate,amount,item_id,customer_id,from;
-    boolean isPlacedSale,isSendKot;
+    boolean isPlacedSale,isSendKot,selected;
     ArrayList getKotList = new ArrayList();
 
     public BillingModel(int s_no,String item_name,String notes,String quantity,String rate,String amount,String item_id,String customer_id,String from,boolean isPlacedSale,boolean isSendKot)
@@ -22,6 +24,22 @@ public class BillingModel {
          this.isPlacedSale = isPlacedSale;
          this.isSendKot = isSendKot;
          this.notes = notes;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
+    public int getKot_no() {
+        return kot_no;
+    }
+
+    public void setKot_no(int kot_no) {
+        this.kot_no = kot_no;
     }
 
     public String getNotes() {

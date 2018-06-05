@@ -8,6 +8,15 @@ public class LoginRequestAndResponse {
     }
 
     public String status_code,status_message,no_of_visit,success,customer_id,name,mobile_num,customer_email,customer_address,Status_code;
+    boolean fromWhere;
+
+    public boolean isFromWhere() {
+        return fromWhere;
+    }
+
+    public void setFromWhere(boolean fromWhere) {
+        this.fromWhere = fromWhere;
+    }
 
     public String getMobile_num() {
         return mobile_num;

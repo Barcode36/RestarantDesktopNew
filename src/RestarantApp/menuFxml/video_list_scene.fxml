@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="catRootPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.menuClass.VideoListController">
+    <children>
+        <SplitPane dividerPositions="0.5234113712374582" prefHeight="160.0" prefWidth="200.0">
+            <items>
+                <AnchorPane fx:id="anchor" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+                    <children>
+                        <TableView fx:id="tableIndex" prefHeight="398.0" prefWidth="322.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="table_id" prefWidth="50.0" text="id">
+                                    <cellValueFactory><PropertyValueFactory property="id" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                                <TableColumn fx:id="table_title" prefWidth="146.0" text="Title"> <cellValueFactory><PropertyValueFactory property="name" />
+                                </cellValueFactory></TableColumn>
+                                <TableColumn fx:id="table_description" prefWidth="125.0" text="Description"> <cellValueFactory><PropertyValueFactory property="status" />
+                                </cellValueFactory></TableColumn>
+                                <TableColumn fx:id="table_image" prefWidth="125.0" text="Image">
+                                    <cellValueFactory>
+                                        <PropertyValueFactory property="status" />
+                                    </cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableView>
+
+                        <ImageView fx:id="imgNext" fitHeight="44.0" fitWidth="39.0" layoutX="308.0" layoutY="333.0" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="30.0" AnchorPane.rightAnchor="30.0">
+                            <image>
+                                <Image url="@../images/next.png" />
+                            </image>
+                        </ImageView>
+                        <ImageView fx:id="imgPrevious" fitHeight="44.0" fitWidth="39.0" layoutX="20.0" layoutY="331.0" pickOnBounds="true" preserveRatio="true" visible="false" AnchorPane.bottomAnchor="28.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="318.0">
+                            <image>
+                                <Image url="@../images/previous.png" />
+                            </image>
+                        </ImageView>
+                    </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="398.0" prefWidth="286.0" style="-fx-background-color: #f58220;" SplitPane.resizableWithParent="false">
+                    <children>
+                        <AnchorPane fx:id="updateImage" layoutX="11.0" layoutY="14.0" prefHeight="355.0" prefWidth="249.0" style="-fx-background-color: #f58220;" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                            <children>
+                                <Label layoutX="8.0" layoutY="89.0" text="Video Id " textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="updateImageId" layoutX="90.0" layoutY="81.0" prefHeight="33.0" prefWidth="149.0" textFill="WHITE" AnchorPane.leftAnchor="90.0" AnchorPane.rightAnchor="11.0">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="13.0" />
+                                    </font></Label>
+                                <Label layoutX="6.0" layoutY="136.0" text="Video Title:" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <TextField fx:id="updateImageTitle" layoutX="126.0" layoutY="136.0" prefHeight="33.0" prefWidth="134.0" AnchorPane.leftAnchor="126.0" AnchorPane.rightAnchor="2.0" />
+                                <Label layoutX="10.0" layoutY="181.0" text="Video Description " textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <TextField fx:id="updateImageDes" layoutX="126.0" layoutY="173.0" prefHeight="33.0" prefWidth="134.0" AnchorPane.leftAnchor="126.0" AnchorPane.rightAnchor="2.0" />
+                                <Button fx:id="btnUpdateImage" layoutX="51.0" layoutY="340.0" mnemonicParsing="false" onMouseClicked="#btnUpdateImage" style="-fx-background-color: #008ccd;" text="Update" textFill="WHITE">
+                                    <font>
+                                        <Font name="System Bold" size="12.0" />
+                                    </font>
+                                </Button>
+                                <ImageView fitHeight="33.0" fitWidth="133.0" layoutX="73.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../images/update_table.png" />
+                                    </image>
+                                </ImageView>
+                        <Label layoutX="3.0" layoutY="220.0" prefHeight="17.0" prefWidth="78.0" text="Video Link" textFill="WHITE">
+                           <font>
+                              <Font name="Times New Roman Bold" size="14.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="updateImageVideo" layoutX="121.0" layoutY="221.0" prefHeight="33.0" prefWidth="141.0" AnchorPane.leftAnchor="126.0" AnchorPane.rightAnchor="2.0" />
+                            </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="viewImage" layoutX="20.0" layoutY="20.0" prefHeight="355.0" prefWidth="249.0" style="-fx-background-color: #f58220;" AnchorPane.bottomAnchor="23.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+                            <children>
+                                <Label layoutX="8.0" layoutY="89.0" text="Video Id :" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label layoutX="6.0" layoutY="136.0" text="Video Title:" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <Label layoutX="10.0" layoutY="181.0" prefHeight="16.0" prefWidth="78.0" text="Video Description :" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                                <ImageView fitHeight="33.0" fitWidth="118.0" layoutX="70.0" layoutY="24.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../images/view_table.png" />
+                                    </image>
+                                </ImageView>
+                                <Label fx:id="viewImageId" layoutX="104.0" layoutY="83.0" text="Label" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="viewImageTitle" layoutX="105.0" layoutY="131.0" text="Label" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="viewImageDescription" layoutX="107.0" layoutY="178.0" text="LabelLabelLabelLabelLabelLabelLabelLabelLabelLabel" textFill="WHITE" wrapText="true">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="20.0" />
+                                    </font>
+                                </Label>
+                                <Label layoutX="10.0" layoutY="216.0" prefHeight="17.0" prefWidth="78.0" text="Video Link" textFill="WHITE">
+                                    <font>
+                                        <Font name="Times New Roman Bold" size="14.0" />
+                                    </font>
+                                </Label>
+                        <Label fx:id="viewVideoLink" layoutX="104.0" layoutY="213.0" textFill="WHITE" wrapText="true">
+                           <font>
+                              <Font name="Times New Roman Bold" size="20.0" />
+                           </font>
+                        </Label>
+                            </children>
+                        </AnchorPane>
+
+                    </children></AnchorPane>
+            </items>
+        </SplitPane>
+    </children>
+</StackPane>

@@ -226,6 +226,8 @@ public class AddComboController implements Initializable {
                                 vBoxLabel.getChildren().clear();
                             }
                         });
+
+
                     }
                 }
 

@@ -4,6 +4,7 @@ import RestarantApp.Network.APIService;
 import RestarantApp.Network.RetrofitClient;
 import RestarantApp.aaditionalClass.UtilsClass;
 import RestarantApp.model.Constants;
+import RestarantApp.model.GalleryModel;
 import RestarantApp.model.RequestAndResponseModel;
 import com.jfoenix.controls.JFXSnackbar;
 import javafx.application.Platform;
@@ -11,7 +12,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -26,81 +26,72 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.stage.FileChooser;
 import org.json.JSONException;
 import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class ListVarietyController implements Initializable {
+public class VideoListController implements Initializable {
     String outputImage = "null";
-    BufferedImage bufferedImage;
-    int totalcount = 0, remainCount = 1, dummyCount = 0, pageNum = 0;
     @FXML
-    TableView<RequestAndResponseModel.list> tableIndex;
-
-    @FXML
-    TableColumn itemIdColm, itemNameColm, itemTaglineColm, itemImagecolm;
-    // The table's data
-    ObservableList<RequestAndResponseModel.list> data;
-    @FXML
-    AnchorPane anchorEditItem, anchorViewItem;
-
-    @FXML
-    Label labId, labViewName, labTagLine, txtFieldId;
-    @FXML
-    ImageView imgViewImage, imgEditImage, imgNext, imgPrevious;
-
-    @FXML
-    TextField txtFieldName, txtFieldTagLine;
-
-    @FXML
-    StackPane rootPane;
+    TableColumn table_id, table_title, table_description, table_image;
     JFXSnackbar jfxSnackbar;
-
+    @FXML
+    StackPane catRootPane;
+    @FXML
+    TableView<GalleryModel.Video_Gallery_list> tableIndex;
+    int totalcount = 0, remainCount = 1, dummyCount = 0, pageNum = 0;
     ArrayList pageNo = new ArrayList();
+    ObservableList<GalleryModel.Video_Gallery_list> data;
+    @FXML
+    ImageView imgNext, imgPrevious;
+    @FXML
+    AnchorPane updateImage, viewImage;
+    @FXML
+    Label updateImageId, viewImageId, viewImageTitle, viewImageDescription,viewVideoLink;
+    @FXML
+    TextField updateImageTitle, updateImageDes,updateImageVideo;
+    BufferedImage bufferedImage;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         String css = ViewCategoryController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
-        rootPane.getStylesheets().add(css);
-        jfxSnackbar = new JFXSnackbar(rootPane);
+        catRootPane.getStylesheets().add(css);
+        jfxSnackbar = new JFXSnackbar(catRootPane);
+        viewImage.setVisible(false);
+        updateImage.setVisible(false);
 
         // Set up the table data
-        itemIdColm.setCellValueFactory(
-                new PropertyValueFactory<RequestAndResponseModel.list, Long>("id")
+        table_id.setCellValueFactory(
+                new PropertyValueFactory<GalleryModel.Video_Gallery_list, Long>("video_gal_id")
         );
-        itemNameColm.setCellValueFactory(
-                new PropertyValueFactory<RequestAndResponseModel.list, String>("name")
+        table_title.setCellValueFactory(
+                new PropertyValueFactory<GalleryModel.Video_Gallery_list, String>("title")
         );
-        itemTaglineColm.setCellValueFactory(
-                new PropertyValueFactory<RequestAndResponseModel.list, String>("tag_line")
+        table_description.setCellValueFactory(
+                new PropertyValueFactory<GalleryModel.Video_Gallery_list, String>("description")
         );
-        itemImagecolm.setCellValueFactory(
-                new PropertyValueFactory<RequestAndResponseModel.list, String>("image")
+        table_image.setCellValueFactory(
+                new PropertyValueFactory<GalleryModel.Video_Gallery_list, String>("video")
         );
+
         tableIndex.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableIndex.getStylesheets().add("/RestarantApp/cssFile/Login.css");
         tableIndex.setFixedCellSize(45);
         tableIndex.prefHeightProperty().bind(Bindings.size(tableIndex.getItems()).multiply(tableIndex.getFixedCellSize()).add(30));
 
-        TableColumn<RequestAndResponseModel.list, RequestAndResponseModel.list> unfriendCol = new TableColumn<>("Action");
+        TableColumn<GalleryModel.Video_Gallery_list, GalleryModel.Video_Gallery_list> unfriendCol = new TableColumn<>("Action");
         unfriendCol.setMinWidth(40);
         unfriendCol.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
         unfriendCol.setCellFactory(param -> {
-            return new TableCell<RequestAndResponseModel.list, RequestAndResponseModel.list>() {
+            return new TableCell<GalleryModel.Video_Gallery_list, GalleryModel.Video_Gallery_list>() {
 
                 Image image1 = new Image(ViewCategoryController.class.getResourceAsStream("/RestarantApp/images/edit.png"));
                 Image image = new Image(ViewCategoryController.class.getResourceAsStream("/RestarantApp/images/delete.png"));
@@ -109,7 +100,7 @@ public class ListVarietyController implements Initializable {
                 Button button1 = new Button("", deleteButton);
 
                 @Override
-                protected void updateItem(RequestAndResponseModel.list person, boolean empty) {
+                protected void updateItem(GalleryModel.Video_Gallery_list person, boolean empty) {
                     super.updateItem(person, empty);
 
                     if (person == null) {
@@ -137,37 +128,29 @@ public class ListVarietyController implements Initializable {
                         @Override
                         public void handle(ActionEvent event) {
 
-                            RequestAndResponseModel.list selectedIndex = getTableView().getItems().get(getIndex());
                             showAlert(person);
-                            System.out.println("person id---------->" + selectedIndex.getId());
+
                         }
                     });
 
-                       /* deleteButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
-                            @Override
-                            public void handle(MouseEvent event) {
-                                event.consume();
+                    deleteButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            event.consume();
 
-//                                RequestAndResponseModel.list currentPerson = (RequestAndResponseModel.list) deleteButton.this.getTableView().getItems().get(ButtonCell.this.getIndex());
 
-                                RequestAndResponseModel.list selectedIndex =getTableView().getItems().get(getIndex());
-                                showAlert(person);
-                                System.out.println("person id---------->"+ selectedIndex.getId());
-
-                            }
-                        });*/
+                        }
+                    });
                     editButton.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
                         @Override
                         public void handle(MouseEvent event) {
                             event.consume();
-                            System.out.println("mouse clicked---------->" + person.getId());
-                            anchorEditItem.setVisible(true);
-                            anchorViewItem.setVisible(false);
-                            txtFieldId.setText(person.getId());
-                            txtFieldTagLine.setText(person.getTag_line());
-                            txtFieldName.setText(person.getName());
-                            Image image = new Image(Constants.VARIETY_BASE_URL + person.getImage());
-                            imgEditImage.setImage(image);
+                            viewImage.setVisible(false);
+                            updateImage.setVisible(true);
+                            updateImageId.setText(person.getVideo_gal_id());
+                            updateImageDes.setText(person.getDescription());
+                            updateImageTitle.setText(person.getTitle());
+                            updateImageVideo.setText(person.getVideo());
 
                         }
                     });
@@ -175,6 +158,8 @@ public class ListVarietyController implements Initializable {
             };
 
         });
+        tableIndex.getColumns().addAll(unfriendCol);
+        getData();
 
         imgNext.addEventHandler(MouseEvent.MOUSE_CLICKED, new EventHandler<MouseEvent>() {
             @Override
@@ -201,77 +186,20 @@ public class ListVarietyController implements Initializable {
             }
         });
 
-        getData();
-
-
-        tableIndex.getColumns().addAll(unfriendCol);
-
-//        addData();
-
-
-        anchorEditItem.setVisible(false);
-        anchorViewItem.setVisible(false);
-
-        //select column value
-        /*ObservableList<TablePosition> selectedCells = tableIndex.getSelectionModel().getSelectedCells() ;
-        selectedCells.addListener((ListChangeListener.Change<? extends TablePosition> change) -> {
-            if (selectedCells.size() > 0) {
-                TablePosition selectedCell = selectedCells.get(0);
-                TableColumn column = selectedCell.getTableColumn();
-                int rowIndex = selectedCell.getRow();
-                String data = (String) column.getCellObservableValue(rowIndex).getValue();
-                System.out.println(data);
-
-            }
-        });*/
-
-
         tableIndex.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                RequestAndResponseModel.list item = tableIndex.getSelectionModel().getSelectedItem();
+                GalleryModel.Video_Gallery_list item = tableIndex.getSelectionModel().getSelectedItem();
                 if (item != null) {
-
-                    anchorViewItem.setVisible(true);
-                    anchorEditItem.setVisible(false);
+                    System.out.println("Call table");
+                    updateImage.setVisible(false);
+                    viewImage.setVisible(true);
                     setViewItem(item);
                 }
             }
         });
+
     }
-
-    public void btnUploadEditAction(ActionEvent actionEvent) {
-
-        FileChooser fileChooser = new FileChooser();
-
-        //Set extension filter
-        FileChooser.ExtensionFilter extFilterJPG = new FileChooser.ExtensionFilter("JPG files (*.jpg)", "*.JPG");
-        FileChooser.ExtensionFilter extFilterPNG = new FileChooser.ExtensionFilter("PNG files (*.png)", "*.PNG");
-        fileChooser.getExtensionFilters().addAll(extFilterJPG, extFilterPNG);
-
-        //Show open file dialog
-        File file = fileChooser.showOpenDialog(null);
-
-        try {
-
-            bufferedImage = ImageIO.read(file);
-            Image image = SwingFXUtils.toFXImage(bufferedImage, null);
-            imgEditImage.setImage(image);
-        } catch (IOException ex) {
-            Logger.getLogger(CategoryController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    private void setViewItem(RequestAndResponseModel.list item) {
-
-        labId.setText(item.getId());
-        labTagLine.setText(item.getTag_line());
-        labViewName.setText(item.getName());
-        Image image = new Image(Constants.VARIETY_BASE_URL + item.getImage());
-        System.out.println(Constants.VARIETY_BASE_URL + item.getImage());
-        imgViewImage.setImage(image);
-    }
-
 
     private void getData() {
         APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
@@ -284,10 +212,10 @@ public class ListVarietyController implements Initializable {
             e.printStackTrace();
         }
 
-        Call<RequestAndResponseModel> call = retrofitClient.viewVariety(jsonObject);
-        call.enqueue(new Callback<RequestAndResponseModel>() {
+        Call<GalleryModel> call = retrofitClient.getVideoGallery(jsonObject);
+        call.enqueue(new Callback<GalleryModel>() {
             @Override
-            public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
+            public void onResponse(Call<GalleryModel> call, Response<GalleryModel> response) {
                 if (response.isSuccessful()) {
                     if (!pageNo.contains(remainCount)) {
                         pageNo.add(remainCount);
@@ -295,13 +223,14 @@ public class ListVarietyController implements Initializable {
                         dummyCount = remainCount - 1;
                     }
                     data = FXCollections.observableArrayList();
-                    RequestAndResponseModel requestAndResponseModel = response.body();
+                    GalleryModel galleryModel = response.body();
 
-                    ArrayList getItemDetils = requestAndResponseModel.getList();
-                    totalcount = requestAndResponseModel.getTot_cats();
+                    ArrayList<GalleryModel.Video_Gallery_list> getItemDetils = galleryModel.getVideo_Gallery_list();
+                    totalcount = galleryModel.getTot_vip_gallery();
                     for (int i = 0; i < getItemDetils.size(); i++) {
-                        RequestAndResponseModel.list list = (RequestAndResponseModel.list) getItemDetils.get(i);
+                        GalleryModel.Video_Gallery_list list = getItemDetils.get(i);
                         data.add(list);
+
                         dummyCount = dummyCount + 1;
                     }
                     remainCount = dummyCount;
@@ -323,63 +252,68 @@ public class ListVarietyController implements Initializable {
                         imgPrevious.setVisible(true);
                     }
 
-
                 }
             }
 
             @Override
-            public void onFailure(Call<RequestAndResponseModel> call, Throwable throwable) {
+            public void onFailure(Call<GalleryModel> call, Throwable throwable) {
 
             }
         });
-
-
     }
 
-
-    void showAlert(RequestAndResponseModel.list list) {
+    void showAlert(GalleryModel.Video_Gallery_list list) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Confirmation Dialog");
         alert.setHeaderText(null);
-        alert.setContentText("Are you want to Delete this " + list.getName() + " Item?");
+        alert.setContentText("Are you want to Delete this  Item?");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == ButtonType.OK) {
-            // ... user chose OK
             deleteItem(list);
         } else {
             alert.close();
-            // ... user chose CANCEL or closed the dialog
+
         }
+    }
+
+    private void setViewItem(GalleryModel.Video_Gallery_list item) {
+
+        viewImageId.setText(item.getVideo_gal_id());
+        viewImageTitle.setText(item.getTitle());
+        viewImageDescription.setText(item.getDescription());
+        viewVideoLink.setText(item.getVideo());
 
     }
 
-    private void deleteItem(RequestAndResponseModel.list itemId) {
+    private void deleteItem(GalleryModel.Video_Gallery_list list) {
 
         APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("varaity_id", itemId.getId());
+            jsonObject.put("video_gal_id", list.getVideo_gal_id());
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        Call<RequestAndResponseModel> call = retrofitClient.deleteVaiety(jsonObject);
+        Call<RequestAndResponseModel> call = retrofitClient.deletVideo(jsonObject);
         call.enqueue(new Callback<RequestAndResponseModel>() {
             @Override
             public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
                 if (response.isSuccessful()) {
                     RequestAndResponseModel requestAndResponseModel = response.body();
-                    System.out.println(requestAndResponseModel.getStatus_message());
-                    if (requestAndResponseModel.getStatus_code().equals(Constants.Success)) {
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                jfxSnackbar.show(requestAndResponseModel.getStatus_message(), 5000);
-                            }
-                        });
-                        data.remove(itemId);
+                    System.out.println(requestAndResponseModel.getStatus_message());   Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            jfxSnackbar.show(requestAndResponseModel.getStatus_message(),5000);
+                        }
+                    });
+                    if (requestAndResponseModel.getStatus_code().equals(Constants.Success))
+                    {
+
+                        data.remove(list);
+
                     }
 
                 }
@@ -390,31 +324,20 @@ public class ListVarietyController implements Initializable {
 
             }
         });
-
     }
-
-    public void btnSubmitEdit(ActionEvent actionEvent) {
-        sendEditCategoryDetails();
-    }
-
-
     public void sendEditCategoryDetails() {
         APIService retrofitClient = RetrofitClient.getClient().create(APIService.class);
         JSONObject jsonObject = new JSONObject();
-        if (bufferedImage != null)
-            outputImage = UtilsClass.encodeToString(bufferedImage, "png");
-        else
-            outputImage = " ";
 
         try {
-            jsonObject.put("cat_name", txtFieldName.getText());
-            jsonObject.put("cat_tag", txtFieldTagLine.getText());
-            jsonObject.put("cat_image", outputImage);
-            jsonObject.put("cat_id", txtFieldId.getText());
+            jsonObject.put("description", updateImageDes.getText());
+            jsonObject.put("title", updateImageTitle.getText());
+            jsonObject.put("video", updateImageVideo.getText());
+            jsonObject.put("video_gal_id",updateImageId.getText());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Call<RequestAndResponseModel> call = retrofitClient.editCategory(jsonObject);
+        Call<RequestAndResponseModel> call = retrofitClient.editVideo(jsonObject);
         call.enqueue(new Callback<RequestAndResponseModel>() {
             @Override
             public void onResponse(Call<RequestAndResponseModel> call, Response<RequestAndResponseModel> response) {
@@ -424,12 +347,9 @@ public class ListVarietyController implements Initializable {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            jfxSnackbar.show(requestAndResponseModel.getStatus_message(), 5000);
+                            jfxSnackbar.show(requestAndResponseModel.getSuccessMessage(), 5000);
+                            updateImage.setVisible(false);
 
-                            txtFieldId.setText("");
-                            txtFieldTagLine.setText("");
-                            txtFieldName.setText("");
-                            imgEditImage.setImage(null);
                         }
                     });
 
@@ -447,5 +367,10 @@ public class ListVarietyController implements Initializable {
             }
         });
 
+    }
+
+    public void btnUpdateImage(MouseEvent mouseEvent) {
+
+        sendEditCategoryDetails();
     }
 }

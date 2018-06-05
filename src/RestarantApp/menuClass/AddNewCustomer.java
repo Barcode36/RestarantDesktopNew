@@ -11,6 +11,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -38,6 +39,10 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
     TextArea txtAddress;
     @FXML
     ProgressIndicator progressAddCustomer;
+    @FXML
+    Button btnCancel;
+    public Boolean isNew;
+    LoginRequestAndResponse loginRequestAndResponse = LoginRequestAndResponse.getInstance();
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         String css = AddNewCustomer.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
@@ -46,6 +51,20 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
         progressAddCustomer.setVisible(false);
         NetworkConnection networkConnection = new NetworkConnection(AddNewCustomer.this);
         isConnectedNetwork =  networkConnection.isInternetReachable();
+
+        System.out.println("From value---->"+loginRequestAndResponse.isFromWhere());
+        if (loginRequestAndResponse.isFromWhere())
+        {
+            btnCancel.setVisible(true);
+            loginRequestAndResponse.setFromWhere(false);
+        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                txtMobileNumber.requestFocus();
+            }
+        });
+
     }
 
     public void btnNewOrder(ActionEvent actionEvent) {
@@ -119,6 +138,10 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
             });
         }
     }
+    public void isCancel()
+    {
+        isNew = true;
+    }
 
     @Override
     public void Networkchanged(boolean isConnected) {
@@ -126,4 +149,8 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
     }
 
 
+    public void btnCancel(ActionEvent actionEvent) {
+        Stage stage = (Stage) btnCancel.getScene().getWindow();
+        stage.close();
+    }
 }

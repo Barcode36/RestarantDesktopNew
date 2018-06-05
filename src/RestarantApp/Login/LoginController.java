@@ -146,22 +146,15 @@ public class LoginController {
             stage.show();
         }else if (txtFieldUsername.getText().equals("test") && txtFieldPassword.getText().equals("test")) {
 
+
             Stage stage;
             Parent root;
             stage=(Stage) btnLogin.getScene().getWindow();
             root = FXMLLoader.load(getClass().getResource("/RestarantApp/Billing/billingscene.fxml"));
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    jfxSnackbar.show("Login sucess",5000);
-                }
-            });
             stage.setTitle("Prawn And Crabs");
             Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
             stage.setScene(new Scene(root, visualBounds.getWidth(), visualBounds.getHeight()));
             stage.show();
-
-
 
         }else
         {

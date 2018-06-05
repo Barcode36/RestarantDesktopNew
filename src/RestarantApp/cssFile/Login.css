@@ -100,3 +100,29 @@
 .combo-box .arrow, .combo-box .arrow-button{
 	-fx-background-color: transparent;
 }
+
+.chart-content {
+	-fx-padding: 30px;
+}
+
+.chart-title {
+	-fx-text-fill: #fff;
+	-fx-font-size: 1.6em;
+}
+
+.axis-label {
+	-fx-text-fill: white;
+}
+
+.chart-legend {
+	-fx-background-color:  transparent;
+	-fx-padding: 20px;
+}
+
+.chart-legend-item-symbol{
+	-fx-background-radius: 0;
+}
+
+.chart-legend-item{
+	-fx-text-fill: #fff;
+}

@@ -169,4 +169,36 @@ public interface APIService {
     @POST("notification_add.php")
     Call<RequestAndResponseModel> sendNotification(@Field("x") JSONObject object);
 
+    @FormUrlEncoded
+    @POST("vip_gallery_add.php")
+    Call<RequestAndResponseModel> sendVIPImage(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("video_gallery_add.php")
+    Call<RequestAndResponseModel> sendVideo(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("vip_gallery_view.php")
+    Call<GalleryModel> getImageGallery(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("vip_gallery_delete.php")
+    Call<RequestAndResponseModel> deletVIPImage(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("vip_gallery_edit.php")
+    Call<RequestAndResponseModel> editVIPImage(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("video_gallery_view.php")
+    Call<GalleryModel> getVideoGallery(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("video_gallery_delete.php")
+    Call<RequestAndResponseModel> deletVideo(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("video_gallery_edit.php")
+    Call<RequestAndResponseModel> editVideo(@Field("x") JSONObject object);
+
 }

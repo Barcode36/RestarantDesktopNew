@@ -15,6 +15,9 @@ import javafx.scene.control.Control;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
@@ -32,9 +35,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -210,6 +213,66 @@ public class UtilsClass {
         });
 
         return comboBox;
+    }
+
+    public static void makeDefaultText(Workbook wb, Row row){
+        CellStyle style = wb.createCellStyle();//Create style
+        style.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)10);
+        font.setFontName("Times New Roman");
+        style.setFont(font);
+        for(int i = 0; i < row.getLastCellNum(); i++){//For each cell in the row
+            row.getCell(i).setCellStyle(style);//Set the sty;e
+        }
+    }
+
+    public static void makeRowBold(Workbook wb, Row row){
+        CellStyle style = wb.createCellStyle();//Create style
+        style.setAlignment(HorizontalAlignment.CENTER);
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)11);
+        font.setFontName("Times New Roman");
+        font.setBold(true);
+        style.setFont(font);
+        for(int i = 0; i < row.getLastCellNum(); i++){//For each cell in the row
+            row.getCell(i).setCellStyle(style);//Set the sty;e
+        }
+    }
+    public static String getNextDate(String  curDate) throws ParseException {
+        final SimpleDateFormat format = new SimpleDateFormat("dd.MM.yyyy");
+        final Date date = format.parse(curDate);
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        return format.format(calendar.getTime());
+    }
+
+    public static Row findCell(XSSFSheet sheet, String text) {
+
+        for(Row row : sheet) {
+            for(Cell cell : row) {
+                if(text.equals(cell.getStringCellValue())) {
+                    Row getRow = cell.getRow();
+                    return getRow;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static ArrayList<Row> findCellsInarray(XSSFSheet sheet, String text) {
+
+        ArrayList<Row> getRowList = new ArrayList<>();
+        for(Row row : sheet) {
+            for(Cell cell : row) {
+                if(text.equals(cell.getStringCellValue())) {
+                    Row getRow = cell.getRow();
+                    getRowList.add(getRow);
+                }
+            }
+        }
+        return getRowList;
     }
 
 

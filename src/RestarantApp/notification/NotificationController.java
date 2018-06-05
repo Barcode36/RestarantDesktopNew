@@ -63,7 +63,7 @@ public class NotificationController implements Initializable {
             }
             String notifiyMessage = jsonObject.toString();
             GcmSender gcmSender = new GcmSender(notifiyMessage);
-            sendMsgToServer();
+//            sendMsgToServer();
             progressSendNoti.setVisible(true);
         }
     }

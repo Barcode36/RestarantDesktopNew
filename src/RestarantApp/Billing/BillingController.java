@@ -14,19 +14,15 @@ import RestarantApp.model.*;
 import com.jfoenix.controls.JFXSnackbar;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -34,15 +30,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.print.Printer;
-import javafx.print.PrinterJob;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.CheckBoxTreeCell;
+import org.apache.poi.EmptyFileException;
+import org.apache.poi.ss.usermodel.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -53,6 +49,9 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.xssf.usermodel.*;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 import org.joda.time.*;
@@ -64,16 +63,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import sun.audio.AudioPlayer;
 import sun.audio.AudioStream;
-import sun.rmi.runtime.Log;
 
-import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.List;
 
 public class BillingController implements Initializable, ItemSelectedListener, GetFromServerListener, NetworkChangeListener{
 
@@ -98,10 +94,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     @FXML
     TableView<BillingModel> tableBill;
     @FXML
-    TableColumn colSno,colItem,colQty,colRate,colAmount,colAddNotes;
+    TableColumn colSno,colItem,colQty,colRate,colAmount,colAddNotes,kotNo;
     @FXML
-    TextField txtQty,txtTotalAmount,txtFiledDiscount,txtFiledDiscountAmount,txtFileldGross,txtGstPercent,txtTotal,txtRounding,txtNetAmount;
+    TextField txtQty,txtTotalAmount,txtFiledDiscount,txtFiledDiscountAmount,txtFileldGross,txtGstPercent,txtTotal,txtRounding,txtNetAmount,txtCashReceived,txtCashBalance;
     ObservableList<BillingModel> modelObservableList = FXCollections.observableArrayList();
+    ObservableList<BillingModel> treeItemList = FXCollections.observableArrayList();
     ArrayList<BillingModel> sendKotList = new ArrayList<>();
     ObservableList<BillingSaveModel> offlineModeList = FXCollections.observableArrayList();
     ItemListRequestAndResponseModel.item_list selectedItem;
@@ -135,8 +132,30 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     Button btnLogout;
     JFXSnackbar jfxSnackbar;
     int tableNo = 0,countEnter=0;
+
+    XSSFSheet spreadsheet = null;
+    XSSFWorkbook workbook= null;
+    XSSFRow row;
+    FileOutputStream out;
+    File sheetFile;
+    FileInputStream fileInputStream;
+    String sheetName = "";
+    ArrayList<String>tableNameList = new ArrayList<>();
+    ArrayList<String> kotNoList = new ArrayList<>();
+    @FXML
+    TreeView<TableTreeItem>listTreeItem;
+    HashMap<String,ArrayList<String>> treeListMap = new HashMap<>();
+
+    //treeView
+    ArrayList<String>rootItem = new ArrayList<>();
+    HashMap<String,ArrayList<String>> kotHashMapList = new HashMap<>();
+    String selectedRoot = "";
+    CheckBox cb;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+
+
         //database connecttivity
         Thread t = new Thread(new Runnable() {
             public void run() {
@@ -229,6 +248,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 getData();
 
                 taxList();
+
             }
         });
 
@@ -253,8 +273,45 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             }
         });
 
+        txtCashReceived.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue,
+                                String newValue) {
+                if (!newValue.matches("\\d*") ) {
 
-        txtFieldId.textProperty().addListener(new ChangeListener<String>() {
+                    txtCashReceived.setText(newValue.replaceAll("[^\\d]", ""));
+
+                }else if ( !newValue.matches("^([1-9][0-9]{0,2}|1000)$"))
+                {
+
+                }
+            }
+        });
+
+        txtCashReceived.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+
+                 if (event.getCode().equals(KeyCode.ENTER)) {
+
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            double getNetAmount = Double.parseDouble(txtNetAmount.getText());
+                            double cashReceiveAmount = Double.parseDouble(txtCashReceived.getText());
+                            if (getNetAmount < cashReceiveAmount)
+                                getBalance();
+                            else
+                                txtCashBalance.setText("");
+                        }
+                    });
+                }
+            }
+        });
+        txtCashBalance.setDisable(true);
+
+
+      /*  txtFieldId.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue,
                                 String newValue) {
@@ -264,12 +321,12 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                 }
             }
-        });
+        });*/
 
         txtFieldId.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                System.out.println(event.getCode());
+
                 if (event.getCode().equals(KeyCode.TAB))
                 {
                     Platform.runLater(new Runnable() {
@@ -283,8 +340,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-
-                    addItemWhenEnter();
+                            if (!txtFieldId.getText().isEmpty())
+                                addItemWhenEnter();
                         }
                     });
                 }
@@ -304,8 +361,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     });
                 }else if (event.getCode().equals(KeyCode.ENTER)) {
 
+                    if(!txtFieldName.getText().isEmpty())
 
-                            addItemWhenEnter();
+                        addItemWhenEnter();
 
                 }
             }
@@ -361,55 +419,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             }
         });
 
-        listTableList.setCellFactory(lv -> {
-
-            ListCell<String> cell = new ListCell<>();
-
-            ContextMenu contextMenu = new ContextMenu();
-
-
-            /*MenuItem editItem = new MenuItem();
-            editItem.textProperty().bind(Bindings.format("Edit \"%s\"", cell.itemProperty()));
-            editItem.setOnAction(event -> {
-                String item = cell.getItem();
-                // code to edit item...
-            });*/
-            MenuItem deleteItem = new MenuItem();
-            deleteItem.textProperty().bind(Bindings.format("Cancel Order \"%s\"", cell.itemProperty()));
-
-            deleteItem.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-
-
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setTitle("Confirmation Dialog");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Are you want to Cancel this Order?");
-
-                    Optional<ButtonType> result = alert.showAndWait();
-                    if (result.get() == ButtonType.OK){
-                        listTableList.getItems().remove(cell.getItem());
-                        modelObservableList.clear();
-                    } else  {
-                        alert.close();
-
-                    }
-                }
-            });
-            contextMenu.getItems().addAll( deleteItem);
-
-            cell.textProperty().bind(cell.itemProperty());
-
-            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-                if (isNowEmpty) {
-                    cell.setContextMenu(null);
-                } else {
-                    cell.setContextMenu(contextMenu);
-                }
-            });
-            return cell ;
-        });
 
 
         txtQty.setText("1");
@@ -418,12 +427,149 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         txtFiledDiscount.textProperty().addListener(addDiscountPercentage);//discount percentage
         txtFiledDiscountAmount.textProperty().addListener(addDiscountAmount);//discount amount
 
+        listTreeItem.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<TableTreeItem>>() {
+            @Override
+            public void changed(ObservableValue<? extends TreeItem<TableTreeItem>> observable, TreeItem<TableTreeItem> oldValue, TreeItem<TableTreeItem> newValue) {
+
+                if (newValue != null) {
+                    String selectedValue = String.valueOf(newValue.getValue());
+
+                    if (newValue != null) {
+                        selectedTable = selectedValue;
+                        if (modelObservableList.size() != 0) {
+                            modelObservableList = tableListValue.get(selectedValue);
+                        }
+                        if (tableListValue.containsKey(selectedValue)) {
+
+                            modelObservableList = tableListValue.get(selectedValue);
+                            tableBill.setItems(modelObservableList);
+                            itemIdList = new ArrayList<>();
+                            if (modelObservableList.size() != 0) {
+                                for (int k = 0; k < modelObservableList.size(); k++) {
+                                    BillingModel billingModel = modelObservableList.get(k);
+                                    billingModel.setS_no(k+1);
+                                    itemIdList.add(Integer.parseInt(billingModel.getItem_id()));
+                                    customer_id = billingModel.getCustomer_id();
+                                }
+                                setSubTotal();
+                            }
+                            tableBill.refresh();
+                            setIsPlaced();
+                        } else {
+                            if (tableListValue.size() != 0) {
+                                Set<String> getKeyFromHashMap = tableListValue.keySet();
+                                ObservableList<BillingModel> billingList = FXCollections.observableArrayList();
+                                ArrayList<String> keyList = new ArrayList<>();
+                                ArrayList<ObservableList<BillingModel>> valuesList = new ArrayList<>();
+                                Iterator<String> iterator = getKeyFromHashMap.iterator();
+                                while (iterator.hasNext()) {
+                                    String name = iterator.next();
+                                    keyList.add(name);
+                                }
+
+                                for (int i = 0; i < keyList.size(); i++) {
+                                    valuesList.add(tableListValue.get(keyList.get(i)));
+                                }
+
+                                for (int j = 0; j < valuesList.size(); j++) {
+                                    ObservableList<BillingModel> billList = valuesList.get(j);
+                                    int count = 1;
+                                    for (int i = 0; i < billList.size(); i++) {
+                                        BillingModel billingModel = billList.get(i);
+                                        String kotNo = String.valueOf(billingModel.getKot_no());
+                                        if (kotNo.equals(selectedValue)) {
+                                            billingModel.setS_no(count);
+                                            count = count + 1;
+                                            billingList.add(billingModel);
+                                        }
+                                    }
+                                }
+
+                                modelObservableList = FXCollections.observableArrayList();
+                                modelObservableList = billingList;
+                                tableBill.setItems(modelObservableList);
+                                itemIdList = new ArrayList<>();
+                                if (modelObservableList.size() != 0) {
+                                    for (int k = 0; k < modelObservableList.size(); k++) {
+                                        BillingModel billingModel = modelObservableList.get(k);
+                                        itemIdList.add(Integer.parseInt(billingModel.getItem_id()));
+                                        customer_id = billingModel.getCustomer_id();
+                                    }
+                                    setSubTotal();
+                                }
+                                tableBill.refresh();
+                                setIsPlaced();
+                            }else {
+                                modelObservableList = FXCollections.observableArrayList();
+                                selectedCheckedItems = FXCollections.observableArrayList();
+                                tableBill.setItems(modelObservableList);
+                                itemIdList = new ArrayList<>();
+                                setIsPlaced();
+                            }
+
+                        }
+
+
+                    }
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtFieldId.requestFocus();
+                        }
+                    });
+
+
+
+                    ContextMenu contextMenu = new ContextMenu();
+                    MenuItem deleteItem = new MenuItem();
+                    deleteItem.textProperty().bind(Bindings.format("Delete \"%s\"", newValue.getValue()));
+                    deleteItem.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setTitle("Confirmation Dialog");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Are you want to Cancel this Order?");
+
+                            Optional<ButtonType> result = alert.showAndWait();
+                            if (result.get() == ButtonType.OK){
+                                TreeItem<TableTreeItem> selected = listTreeItem.getSelectionModel().getSelectedItem();
+                                selected.getParent().getChildren().remove(selected);
+                                rootItem.remove(selectedValue);
+                                modelObservableList.clear();
+
+                            } else  {
+                                alert.close();
+
+                            }
+                        }
+                    });
+
+                    MenuItem printItem = new MenuItem();
+                    printItem.textProperty().bind(Bindings.format("Print Kot \"%s\"", newValue.getValue()));
+                    if (rootItem.contains(selectedValue))
+                    {
+                        System.out.println("Selected Text yes:----> " + newValue.getValue());
+                        contextMenu.getItems().add(deleteItem);
+                    }else{
+                        System.out.println("Selected Text No:----> " + newValue.getValue());
+                        contextMenu.getItems().add(printItem);
+                    }
+
+                    listTreeItem.setContextMenu(contextMenu);
+                }
+
+
+
+            }
+        });
+
 
 
         listTableList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                if (newValue != null) {
+             /*   if (newValue != null) {
                     selectedTable = newValue;
                     if (modelObservableList.size() != 0) {
                         modelObservableList = tableListValue.get(newValue);
@@ -460,7 +606,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     public void run() {
                         txtFieldId.requestFocus();
                     }
-                });
+                });*/
             }
         });
 
@@ -470,7 +616,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 super.updateItem(item, empty) ;
                 if (item == null) {
                     setStyle("");
-                } else if (item.isSendKot()) {
+                } else if (item.getKot_no() != 0) {
                     setStyle("-fx-background-color: #ffcad0;");
                 } else {
                     setStyle("");
@@ -488,14 +634,23 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     String con = String.valueOf(tableNo);
                     con = loginRequestAndResponse.getName()+"("+con+")";
                     tableList.add(con);
+
+                    rootItem.add(con);
+                    selectedTable = con;
                 }else {
                     tableList.add(loginRequestAndResponse.getName());
+                    rootItem.add(loginRequestAndResponse.getName());
+
+                    selectedTable = loginRequestAndResponse.getName();
                 }
                 listTableList.setItems(tableList);
+                addTreeView();
                 modelObservableList = FXCollections.observableArrayList();
                 serialNo = 1;
                 from = "parcel";
                 customer_id = loginRequestAndResponse.getCustomer_id();
+
+                addItemWhenSelected(selectedTable);
                 NetworkConnection networkConnection = new NetworkConnection(BillingController.this);
 
 //                tableListValue.put(loginRequestAndResponse.getCustomer_id(),modelObservableList);
@@ -518,6 +673,106 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         alert.getButtonTypes().remove(0);
 
 
+
+    }
+
+
+    public void addItemWhenSelected(String selectedValue)
+    {
+
+
+            if (selectedValue != null) {
+                selectedTable = selectedValue;
+                if (modelObservableList.size() != 0) {
+                    modelObservableList = tableListValue.get(selectedValue);
+                }
+                if (tableListValue.containsKey(selectedValue)) {
+
+                    modelObservableList = tableListValue.get(selectedValue);
+                    tableBill.setItems(modelObservableList);
+                    itemIdList = new ArrayList<>();
+                    if (modelObservableList.size() != 0) {
+                        for (int k = 0; k < modelObservableList.size(); k++) {
+                            BillingModel billingModel = modelObservableList.get(k);
+                            billingModel.setS_no(k+1);
+                            itemIdList.add(Integer.parseInt(billingModel.getItem_id()));
+                            customer_id = billingModel.getCustomer_id();
+                        }
+                        setSubTotal();
+                    }
+                    tableBill.refresh();
+                    setIsPlaced();
+                } else {
+                    if (tableListValue.size() != 0) {
+                        Set<String> getKeyFromHashMap = tableListValue.keySet();
+                        ObservableList<BillingModel> billingList = FXCollections.observableArrayList();
+                        ArrayList<String> keyList = new ArrayList<>();
+                        ArrayList<ObservableList<BillingModel>> valuesList = new ArrayList<>();
+                        Iterator<String> iterator = getKeyFromHashMap.iterator();
+                        while (iterator.hasNext()) {
+                            String name = iterator.next();
+                            keyList.add(name);
+                        }
+
+                        for (int i = 0; i < keyList.size(); i++) {
+                            valuesList.add(tableListValue.get(keyList.get(i)));
+                        }
+
+                        for (int j = 0; j < valuesList.size(); j++) {
+                            ObservableList<BillingModel> billList = valuesList.get(j);
+                            int count = 1;
+                            for (int i = 0; i < billList.size(); i++) {
+                                BillingModel billingModel = billList.get(i);
+                                String kotNo = String.valueOf(billingModel.getKot_no());
+                                if (kotNo.equals(selectedValue)) {
+                                    billingModel.setS_no(count);
+                                    count = count + 1;
+                                    billingList.add(billingModel);
+                                }
+                            }
+                        }
+
+                        modelObservableList = FXCollections.observableArrayList();
+                        modelObservableList = billingList;
+                        tableBill.setItems(modelObservableList);
+                        itemIdList = new ArrayList<>();
+                        if (modelObservableList.size() != 0) {
+                            for (int k = 0; k < modelObservableList.size(); k++) {
+                                BillingModel billingModel = modelObservableList.get(k);
+                                itemIdList.add(Integer.parseInt(billingModel.getItem_id()));
+                                customer_id = billingModel.getCustomer_id();
+                            }
+                            setSubTotal();
+                        }
+                        tableBill.refresh();
+                        setIsPlaced();
+                    }else {
+                        modelObservableList = FXCollections.observableArrayList();
+                        selectedCheckedItems = FXCollections.observableArrayList();
+                        tableBill.setItems(modelObservableList);
+                        itemIdList = new ArrayList<>();
+                        setIsPlaced();
+                    }
+
+                }
+
+
+            }
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    txtFieldId.requestFocus();
+                }
+            });
+
+    }
+    private void getBalance() {
+        double getNetAmount = Double.parseDouble(txtNetAmount.getText());
+        double cashReceiveAmount = Double.parseDouble(txtCashReceived.getText());
+        double balanceAmount = cashReceiveAmount - getNetAmount;
+        String remainingAmt = String.format ("%.1f", balanceAmount);
+        txtCashBalance.setText(remainingAmt);
+
     }
 
     private void addItemWhenEnter() {
@@ -532,7 +787,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                 } else if (item_list.getShort_code().equals(txtFieldId.getText().trim())) {
                     selectedItem = item_list;
-                    System.out.println("get item name  " + item_list.getItem_name());
+
                     txtFieldName.setText(item_list.getItem_name());
                     txtFieldName.hidePopUp();
 
@@ -630,19 +885,24 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         tableBill.setEditable(true);
         colSno.setResizable(false);
         colSno.setCellValueFactory(new PropertyValueFactory<BillingModel,Integer>("s_no"));
+        cb = new CheckBox();
+        cb.setOnAction(handleSelectAllCheckbox());
+//        cb.setUserData(this.colSno);
+        this.colSno.setGraphic(cb);
+
         colSno.setCellFactory(param -> {
             return new TableCell<BillingModel,Integer>()
             {
                 CheckBox checkBox = new CheckBox();
                   @Override
                     public void updateItem(Integer item, boolean empty) {
+                      super.updateItem(item,empty);
                         if (empty)
                         {
                             setGraphic(null);
                         }else
                         {
 //                        checkBox.setSelected(true);
-                            System.out.println(modelObservableList.size());
                             BillingModel billingModel = modelObservableList.get(item-1);
                             checkBox.setText(String.valueOf(billingModel.getS_no()));
                             if (billingModel.isSendKot)
@@ -650,6 +910,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                 checkBox.setSelected(false);
                             }
 //                            checkBox.setSelected(billingModel.isSendKot());
+
+                            if (billingModel.isSelected())
+                            {
+                                checkBox.setSelected(true);
+                            }else
+                            {
+                                checkBox.setSelected(false);
+                            }
                             setGraphic(checkBox);
 
                             checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -691,11 +959,15 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         colSno.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
             @Override
             public void handle(TableColumn.CellEditEvent event) {
-                System.out.println("call event");
+
             }
         });
 
         colSno.setPrefWidth( 60 );
+
+        kotNo.setCellValueFactory(new PropertyValueFactory<BillingModel,Integer>("kot_no"));
+        kotNo.setPrefWidth( 60 );
+
 
         colItem.setCellValueFactory(
                 new PropertyValueFactory<BillingModel,String>("item_name")
@@ -704,11 +976,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         colQty.setCellValueFactory(
                 new PropertyValueFactory<BillingModel,String>("quantity")
         );
-        colQty.setPrefWidth( 100 );
+        colQty.setPrefWidth( 70 );
         tableBill.setEditable( true );
         javafx.util.Callback<TableColumn, TableCell> cellFactory =
                 new javafx.util.Callback<TableColumn, TableCell>() {
-
                     @Override
                     public TableCell call(TableColumn p) {
                         return new EditingCell();
@@ -767,7 +1038,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 new PropertyValueFactory<BillingModel,String>("amount")
         );
 
-        colAmount.setPrefWidth( 120 );
+        colAmount.setPrefWidth( 110 );
 
 
         tableBill.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
@@ -835,9 +1106,59 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         });
         tableBill.getColumns().addAll(unfriendCol);
 
+        listTreeItem.setCellFactory(new javafx.util.Callback<TreeView<TableTreeItem>, TreeCell<TableTreeItem>>() {
+
+            @Override
+            public TreeCell<TableTreeItem> call(TreeView<TableTreeItem> param) {
+
+                CheckBoxTreeCell<TableTreeItem> treeItemCheckBoxTreeCell = new CheckBoxTreeCell<>();
+
+                return treeItemCheckBoxTreeCell;
+            }
+        });
+
 
     }
 
+    private EventHandler<ActionEvent> handleSelectAllCheckbox() {
+
+
+        return new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                CheckBox cb = (CheckBox) event.getSource();
+                TableColumn column = (TableColumn) cb.getUserData();
+                checkBoxIndex = new ArrayList<>();
+                if (cb.isSelected()) {
+
+
+                   for (int i = 0; i < modelObservableList.size() ; i ++)
+                   {
+                       BillingModel  billingModel  = modelObservableList.get(i);
+                       System.out.println("check box selected---->"+billingModel.isSendKot());
+                       if (!billingModel.isSendKot()) {
+                           billingModel.setSelected(true);
+                           checkBoxIndex.add(String.valueOf(i));
+                           billingModel.setSendKot(true);
+                       }
+                   }
+                } else {
+
+                    for (BillingModel billingModel : modelObservableList) {
+                        billingModel.setSelected(false);
+                        if (billingModel.isSendKot()){
+                            billingModel.setSendKot(true);
+                        }else{
+                            billingModel.setSendKot(false);
+                        }
+                    }
+                    checkBoxIndex = new ArrayList<>();
+                }
+
+                tableBill.refresh();
+            }
+        };
+    }
 
     private void getData() {
         itemLoadProgres.setVisible(true);
@@ -905,9 +1226,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     BillingModel billingModel;
                     if (itemIdList.size() != 0) {
                         int itemId = Integer.parseInt(selectedItem.getShort_code());
-                        System.out.println(itemId);
+
                         if (itemIdList.contains(itemId)) {
-                            System.out.println("yes");
+
                             for (int j = 0; j < modelObservableList.size(); j++) {
                                 BillingModel billingModelList = modelObservableList.get(j);
                                 if (billingModelList.getItem_id().equals(selectedItem.getShort_code())) {
@@ -990,11 +1311,81 @@ public class BillingController implements Initializable, ItemSelectedListener, G
     public void btnAddItem(MouseEvent mouseEvent) {
         if (selectedTable != null )
         {
+
             addItem();
+            addTreeView();
         }else
         {
             Constants.showAlert(Alert.AlertType.WARNING,"Warning","Warning","Please Select Table");
         }
+
+    }
+
+    private void addTreeView() {
+
+        TableTreeItem layer1 = new TableTreeItem("Root", false);
+        TreeItem<TableTreeItem> rootList = new TreeItem<>(layer1);
+
+        rootList.setExpanded(true);
+
+
+       for (int j= 0 ; j < rootItem.size() ; j ++) {
+           TableTreeItem tableTreeItem = new TableTreeItem(rootItem.get(j),false);
+           CheckBoxTreeItem<TableTreeItem> treeItem = new CheckBoxTreeItem<TableTreeItem>(tableTreeItem);
+           treeItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
+               System.out.println(treeItem.getValue() + " selection state: " + newVal);
+               selectedRoot = String.valueOf(treeItem.getValue());
+
+           });
+           String strRootItem = rootItem.get(j);
+
+               ObservableList<BillingModel> billingModels = tableListValue.get(strRootItem);
+               ArrayList<String> kotNoList = new ArrayList<>();
+               if (billingModels != null) {
+                   for (int k = 0; k < billingModels.size(); k++) {
+                       BillingModel billingModel = billingModels.get(k);
+                       String kotNo = String.valueOf(billingModel.getKot_no());
+                       if (!kotNoList.contains(kotNo) && !kotNo.equals("0")) {
+                           kotNoList.add(kotNo);
+                       }
+                   }
+
+                   ArrayList<String> selectedKot = new ArrayList<>();
+                   for (int i = 0 ; i < kotNoList.size() ; i ++) {
+                       TableTreeItem tableChildTreeItem = new TableTreeItem(kotNoList.get(i), false);
+                       CheckBoxTreeItem<TableTreeItem> treeChildItem = new CheckBoxTreeItem<TableTreeItem>(tableChildTreeItem);
+
+                       treeChildItem.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                            if (newVal && !selectedKot.contains(String.valueOf(treeChildItem.getValue())))
+                                selectedKot.add(String.valueOf(treeChildItem.getValue()));
+                            else if (!newVal)
+                            {
+                                String value = String.valueOf(treeChildItem.getValue());
+                                if (selectedKot.contains(value))
+                                {
+                                    selectedKot.remove(value);
+                                }
+                            }
+
+                            String tableName =String.valueOf( treeItem.getValue());
+                            kotHashMapList.put(tableName,selectedKot);
+                            selectedRoot = String.valueOf(treeItem.getValue());
+                           System.out.println(treeItem.getValue() +"----->"+ treeChildItem.getValue() + " selection child1 state: " + newVal);
+                           System.out.println(kotHashMapList);
+                       });
+                        treeItem.getChildren().add(treeChildItem);
+                   }
+
+               }
+
+           rootList.getChildren().add(treeItem);
+       }
+
+
+        listTreeItem.setRoot(rootList);
+        listTreeItem.setShowRoot(false);
+
+
 
     }
 
@@ -1014,7 +1405,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         double totalAmount = Double.valueOf(txtTotalAmount.getText());
         if (!txtFiledDiscount.getText().isEmpty())
         {
-            System.out.println(txtFiledDiscount.getText());
+
 
             double getValue = Double.valueOf(txtFiledDiscount.getText());
             getValue = getValue/100;
@@ -1087,11 +1478,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             deletedItemPrice = deletedItemPrice * deletedItemQty ;
             subTotal = subTotal - deletedItemPrice;
             String subtotal = String.valueOf(subTotal);
-            System.out.println(subtotal);
+
             txtTotalAmount.setText(subtotal);
             modelObservableList.remove(list);
             int itemIdDelete = Integer.parseInt(list.getItem_id());
-            System.out.println("item index---->"+itemIdList.indexOf(itemIdDelete));
+
 
             itemIdList.remove(itemIdList.indexOf(itemIdDelete));
             changeSNo();
@@ -1144,13 +1535,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             {
                                 int comb1 = list.getComp1();
                                 int comb2 = list.getComp2();
-                                System.out.println("get combination--->"+getTaxListDetails.get(comb1));
+
                                 tax1 = taxNAme.get(comb1)+"("+getTaxListDetails.get(comb1) + "%)";
                                 tax2 =  taxNAme.get(comb2)+"("+getTaxListDetails.get(comb2) + "%)";
                                 intTaxPrice = getTaxListDetails.get(comb1)+getTaxListDetails.get(comb2);
                                 tax_1 = String.valueOf(getTaxListDetails.get(comb1));
                                 tax_2 = String.valueOf(getTaxListDetails.get(comb2));
-                                System.out.println("get combination--->"+intTaxPrice);
+
                                 txtGstPercent.setText(String.valueOf(intTaxPrice)+"%");
                                 txtGstPercent.setEditable(false);
                             }
@@ -1158,7 +1549,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     }
 
                 }
-                System.out.println(getTaxListDetails);
+
             }
 
             @Override
@@ -1180,14 +1571,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             {
                 if (split2 > 5)
                 {
-                    System.out.println("greater than 5");
 
                     int roundValue = Integer.parseInt(totalValueSplit[0]);
                     int actulaValue = roundValue + 1;
                     txtNetAmount.setText(String.valueOf(actulaValue));
 
                     double rounding = Double.valueOf(txtTotal.getText());
-                    System.out.println(String.valueOf(rounding - actulaValue));
+
                     String roundValueText = String.format("%.2f",rounding - actulaValue);
                     txtRounding.setText(roundValueText);
                     String round = String.valueOf(rounding - actulaValue);
@@ -1204,13 +1594,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                 }else if (split2 < 5)
                 {
-                    System.out.println("less than 5");
+
                     int roundValue = Integer.parseInt(totalValueSplit[0]);
                     int actulaValue = roundValue ;
                     txtNetAmount.setText(String.valueOf(actulaValue));
 
                     double rounding = Double.valueOf(txtTotal.getText());
-                    System.out.println(String.valueOf(rounding - actulaValue));
+
                     String round = String.valueOf(rounding - actulaValue);
                     String roundValueText = String.format("%.2f",rounding - actulaValue);
 //                    txtRounding.setText(round);
@@ -1226,14 +1616,14 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                 }else
                 {
-                    System.out.println("equals to 5");
+
 
                     int roundValue = Integer.parseInt(totalValueSplit[0]);
                     int actulaValue = roundValue + 1;
                     txtNetAmount.setText(String.valueOf(actulaValue));
 
                     double rounding = Double.valueOf(txtTotal.getText());
-                    System.out.println(String.valueOf(rounding - actulaValue));
+
                     txtRounding.setText(String.valueOf(rounding - actulaValue));
                     String round = String.valueOf(rounding - actulaValue);
                     String roundValueText = String.format("%.2f",rounding - actulaValue);
@@ -1248,7 +1638,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 }
             }else
             {
-                System.out.println("retuns 0");
+
                 txtNetAmount.setText(totalValueSplit[0]);
                 txtRounding.setText("0");
             }
@@ -1262,7 +1652,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         double givenValue = Double.valueOf(discountValue);
         double percentage = givenValue / totalAmount;
         percentage = percentage * 100;
-        System.out.println("new percentage---->"+String.valueOf(percentage));
+
         String percent = String.valueOf(percentage);
         if (percent.contains("."))
         {
@@ -1299,7 +1689,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     getValue = Double.valueOf(newValue);
                 }
 
-                System.out.println(newValue);
+
 
                 getValue = getValue/100;
                 getValue = getValue*totalAmount;
@@ -1375,10 +1765,11 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             tableList.add(table);
                     modelObservableList =  FXCollections.observableArrayList();
                     itemIdList = new ArrayList<>();
-                    listTableList.setItems(tableList);
+                    rootItem.add(table);
+//                    listTableList.setItems(tableList);
                             try {
                                 if (itemList.getString("from").equals("mobile")) {
-                                    System.out.println(body);
+
                                     serialNo = 1;
                                     if (itemList.has("Item_list")) {
                                         JSONArray itemListArray = itemList.getJSONArray("Item_list");
@@ -1423,6 +1814,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                         customer_id = customer_id_from;
                                         tableListValue.put(table, modelObservableList);
                                         playMusic(table);
+                                        addTreeView();
                                     }
                                 }
                             } catch (JSONException e) {
@@ -1439,7 +1831,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             modelObservableList = FXCollections.observableArrayList();
                             try {
 //                                if (itemList.getString("from").equals("mobile")) {
-                                    System.out.println(body);
+
                                     if (itemList.has("Item_list")) {
                                         JSONArray itemListArray = itemList.getJSONArray("Item_list");
                                         String customer_id_from = itemList.getString("cus_id");
@@ -1508,7 +1900,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             music = new FileInputStream(new File("src/RestarantApp/sound/beep.wav"));
             AudioStream audio =new AudioStream(music);
             AudioPlayer.player.start(audio);
-            System.out.println("play music");
+
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println(e);
@@ -1590,7 +1982,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 for (int i = 0; i < billingSaveModels.size(); i++) {
                     BillingSaveModel billingSaveModel = billingSaveModels.get(i);
                     if (order_id == billingSaveModel.getOreder_id()) {
-                        System.out.println("bill" + order_id + "---->" + billingSaveModel.getItem_id() + " qty--->" + billingSaveModel.getQty());
                         offlineModeList.add(billingSaveModel);
                     }
                 }
@@ -1717,9 +2108,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 placedOrder("online");
             }else
             {
-                System.out.println("sale closed");
+
                 listTableList.getItems().remove(listTableList.getSelectionModel().getSelectedItem());
                 modelObservableList.clear();
+                modelObservableList =FXCollections.observableArrayList();
                 FileInputStream input = null;
 
                 try {
@@ -1742,9 +2134,10 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 insertIntoDb();
             }else
             {
-                System.out.println("sale closed");
+
                 listTableList.getItems().remove(listTableList.getSelectionModel().getSelectedItem());
                 modelObservableList.clear();
+                modelObservableList =FXCollections.observableArrayList();
                 FileInputStream input = null;
 
                 try {
@@ -1785,7 +2178,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             String list = listArray.toString();
             list = list.substring(1, list.length() - 1);
             list = "{" + list + "}";
-            System.out.println(list);
+
             BillingSaveModel billingSaveModel = offlineModeList.get(0);
             JSONObject itemList = null;
             try {
@@ -1814,7 +2207,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     if (response.isSuccessful())
                     {
                         RequestAndResponseModel requestAndResponseModel = response.body();
-                        System.out.println("order id----->"+requestAndResponseModel.getOrder_id());
+
 
 
                     }
@@ -1913,21 +2306,49 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                                     Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/closesale.png"));
                                     imgPlaceOrder.setImage(image2);
+
+
+                                        try {
+                                            fileInputStream = new FileInputStream(sheetFile);
+                                            workbook = new XSSFWorkbook(fileInputStream);
+                                            spreadsheet =workbook.getSheet(sheetName);
+                                            for (int i= 0; i < kotList.size() ; i ++) {
+                                                Row selectedRow = UtilsClass.findCell(spreadsheet, kotList.get(i));
+                                                ArrayList<Row> getRow = UtilsClass.findCellsInarray(spreadsheet,kotList.get(i));
+                                                for (int j = 0 ; j<getRow.size();j++)
+                                                {
+                                                    Row row = getRow.get(j);
+                                                    row.createCell(4).setCellValue(requestAndResponseModel.getOrder_id());
+                                                    UtilsClass.makeDefaultText(workbook,row);
+                                                }
+
+                                            }
+                                            fileInputStream.close();
+                                                FileOutputStream outFile = new FileOutputStream(sheetFile);
+                                            workbook.write(outFile);
+                                            outFile.close();
+
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+
+
 //                                    jfxSnackbar.show("Image show",5000);
                               /*  } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
+                                    e.printStackT1race();
                                     jfxSnackbar.show("Image not show",5000);
                                 }*/
                                 /*Image image = new Image(input[0]);
                                 imgPlaceOrder.setImage(image);*/
                                 btnAddItem.setOnMouseClicked(null);
                                 itemLoadProgres.setVisible(false);
+                                kotList = new ArrayList<>();
                                     }
                                 });
 
                             }
 
-                            System.out.println("order id----->"+requestAndResponseModel.getOrder_id());
+
 
                         }
                     }
@@ -1976,7 +2397,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             {
                 sqliteConnection.insertDataToOrderMaster(1001, customer_id,tableCount,loginRequestAndResponse.getMobile_num(),loginRequestAndResponse.getName(),loginRequestAndResponse.getCustomer_email(),loginRequestAndResponse.getCustomer_address());
             }
-            System.out.println(   sqliteConnection.getLastRow());
             for (int i =0 ; i < modelObservableList.size() ; i++)
             {
                 BillingModel billingModel = modelObservableList.get(i);
@@ -2041,13 +2461,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     public void btnPrintKot(MouseEvent mouseEvent) {
 
-//        System.out.println(printerService.getPrinters());
-        printThisBill();
+        printKot();
+
 
     }
 
 
-    public void printThisBill()
+    public void printKot()
     {
 
         int lastKot_number = sqliteConnection.getLastKOTNumber();
@@ -2064,7 +2484,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         if (kotLastDate == null)
         {
 
-            System.out.println(dateFormat_1.format(date_1)); //2016/11/16 12:08:43
             sqliteConnection.insertKot(100,dateFormat_1.format(date_1));
             kotLastDate = sqliteConnection.getLastKOTDATE();
 
@@ -2100,10 +2519,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
             int get_hour = Hours.hoursBetween(dt2, dt1).getHours() % 24 ;
 
-            System.out.print(Days.daysBetween(dt1, dt2).getDays() + " days, ");
-            System.out.print(Hours.hoursBetween(dt2, dt1).getHours() % 24 + " hours, ");
-            System.out.print(Minutes.minutesBetween(dt1, dt2).getMinutes() % 60 + " minutes, ");
-            System.out.print(Seconds.secondsBetween(dt1, dt2).getSeconds() % 60 + " seconds.");
             if (get_hour < 24 || get_hour == 0)
             {
 
@@ -2134,10 +2549,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         final String[] item = {""};
         final int[] totalQty = {0};
         final int[] ssNo = {0};
+
         if (modelObservableList.size() != 0)
         {
-
-
 
             if (!getSendKot.containsKey(listTableList.getSelectionModel().getSelectedItem()))
             {
@@ -2162,30 +2576,52 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         item[0] =item[0] + "           [ "+notes+" ]\n";
                     }
                     billingModel.setSendKot(true);
+                    billingModel.setSelected(false);
                     kotList.add(String.valueOf(lastKot_number+1));
                     billingModel.setGetKotList(kotList);
+                    billingModel.setKot_no(lastKot_number+1);
+
+                    tableNameList.add(selectedTable);
+                    kotNoList.add(String.valueOf(lastKot_number+1));
 
                 }
 
 
             }
+            cb.setSelected(false);
+            tableBill.refresh();
         }
+
+
+
+
+        addTreeView();
         String line = " ------------------------------------\n";
         String total_item = "                  Total Item(s)  "+ totalQty[0];
         header = header+listItem+item_header+ item[0] +line+total_item+"\n\n\n\n\n\n\n";
-        System.out.print(header);
-     /*   PrinterService printerService = new PrinterService();
-        //print some stuff
-        printerService.printString("RP3150 STAR(U) 1",header);
-
-        // cut that paper!
-        byte[] cutP = new byte[] { 0x1d, 'V', 1 };
-
-        printerService.printBytes("RP3150 STAR(U) 1", cutP);*/
 
 
+        tableBill.setRowFactory(tv -> new TableRow<BillingModel>() {
+            @Override
+            public void updateItem(BillingModel item, boolean empty) {
+                super.updateItem(item, empty) ;
+                if (item == null) {
+                    setStyle("");
+                } else if (item.getKot_no() != 0) {
 
-        ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
+
+                    setStyle("-fx-background-color: #ffcad0;");
+
+
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+
+//        generateXsl();
+
+        /*ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
         dialog.setHeaderText("Choose the printer!");
         dialog.setContentText("Choose a printer from available printers");
         dialog.setTitle("Printer Choice");
@@ -2223,7 +2659,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         }else
         {
 
-        }
+        }*/
 
 
     }
@@ -2232,12 +2668,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     public void printBill()
     {
-        for (int j = 0 ; j < kotList.size() ; j ++)
-        {
-            System.out.print("kot list--->"+kotList.get(j));
-        }
-
-        Set<String> s = new LinkedHashSet<String>(kotList);
+        ArrayList<String> getPrintItem = kotHashMapList.get(selectedRoot);
         DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         DateFormat timeFormat = new SimpleDateFormat("hh:mm a");
         //get current date time with Date()
@@ -2290,6 +2721,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         {
 
             BillingModel billingModel = modelObservableList.get(i);
+            if (getPrintItem.contains(String.valueOf(billingModel.getKot_no()))){
             String item_name = billingModel.getItem_name();
             String qty = billingModel.getQuantity();
                 ssNo = ssNo + 1;
@@ -2306,12 +2738,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                         Qty = Qty + Integer.parseInt(billingModel1.getQuantity());
                     }
                 }
-                System.out.println("Qty--->"+Qty);
+
 
                 double rateValue = Double.parseDouble(billingModel.getRate());
                 double amt1 = rateValue * Qty;
-                item =item + String.format("%2s %-16s %5s %7s %5.2f\n",ssNo,item_name, Qty, rate,amt1);
-
+                item = item + String.format("%2s %-16s %5s %7s %5.2f\n", ssNo, item_name, Qty, rate, amt1);
+                System.out.println(item);
+             }
 
             }
 
@@ -2344,7 +2777,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
              discountAmount = Double.parseDouble(txtFiledDiscountAmount.getText());
         }
 
-        System.out.print("gst value-------->"+gstValue);
+
         String line = "------------------------------------------\n";
         String subTotal=String.format("%32s : %6.2f\n","Sub Total",totalAmount);
         String percentage=String.format("%26s(%2s%%): %6.2f\n","Discount",txtFiledDiscount.getText(),discountAmount);
@@ -2361,7 +2794,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             header = header + listItem + item_header + line2 +item + line + subTotal  + netTotal+cgst+scgst+line1+grantTotl+thnk_you+"\n\n\n\n";
         }
 
-        System.out.print(header);
+
+        System.out.println("kot list-------->"+header);
         ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
         dialog.setHeaderText("Choose the printer!");
         dialog.setContentText("Choose a printer from available printers");
@@ -2378,8 +2812,6 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
             printerService.printBytes("RP3150 STAR(U) 1", cutP);
         }
-
-
 
     }
 
@@ -2422,7 +2854,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
             @Override
             public void onFailure(Call<ItemListRequestAndResponseModel> call, Throwable throwable) {
-                System.out.println(throwable);
+
             }
         });
 
@@ -2462,5 +2894,162 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     }
 
-    
+
+    public void btnAddNewCustomer(MouseEvent mouseEvent) {
+
+        LoginRequestAndResponse loginRequestAndResponse =LoginRequestAndResponse.getInstance();
+        loginRequestAndResponse.setFromWhere(true);
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/RestarantApp/menuFxml/add_new_customer.fxml"));
+        Parent root1 = null;
+        try {
+            root1 = (Parent) fxmlLoader.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setScene(new Scene(root1));
+        stage.show();
+    }
+
+    public void generateXsl()
+    {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+
+
+                String[] monthName = { "January", "February", "March", "April", "May", "June", "July",
+                        "August", "September", "October", "November", "December" };
+                DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+                Date date = new Date();
+                Calendar cl = Calendar. getInstance();
+                cl.setTime(date);
+                String month = monthName[cl.get(Calendar.MONTH)];
+/*
+                System.out.println("today is a "+cl.get(Calendar.WEEK_OF_MONTH) +"year" + cl.get(Calendar.YEAR) +"week of the month");
+                System.out.println("Current Month is : " + month);
+*/
+
+                String file_name = month+cl.get(Calendar.YEAR)+"_"+cl.get(Calendar.WEEK_OF_MONTH)+"Week";
+
+
+                sheetName = dateFormat.format(date);
+                sheetFile = new File("d:\\prawn_crab\\"+file_name+".xlsx");
+                boolean containsSheet = false;
+                if (sheetFile.exists())
+                {
+                    try {
+
+                        fileInputStream = new FileInputStream(sheetFile);
+                        workbook = new XSSFWorkbook(fileInputStream);
+
+                        int no_sheets = workbook.getNumberOfSheets();
+                        for (int i= 0 ; i < no_sheets ; i ++)
+                        {
+                            String sheetName= workbook.getSheetName(i);
+                            if (sheetName.equals(sheetName))
+                            {
+                                containsSheet = true;
+
+                            }
+                        }
+                        if (containsSheet)
+                        {
+                            spreadsheet = workbook.getSheet(sheetName);
+                        }else
+                        {
+                            spreadsheet = workbook.createSheet( sheetName);
+                        }
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }catch (EmptyFileException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }else
+                {
+
+                        workbook = new XSSFWorkbook();
+                        spreadsheet = workbook.createSheet( sheetName);
+
+
+                }
+
+                Map < String, Object[] > item_info = new TreeMap < String, Object[] >();
+                int rowCount = spreadsheet.getLastRowNum();
+
+                if (!sheetFile.exists() || !containsSheet)
+                    item_info.put( String.valueOf(rowCount), new Object[] {
+                        "SHORT ID", "ITEM NAME" ,"QTY" ,"KOT NUMBER","ORDER NUMBER"});
+
+              /*  for (int i = 0 ; i < modelObservableList.size() ;i++)
+                {
+                    BillingModel billingModel = modelObservableList.get(i);
+                    if (billingModel.isSendKot() ) {
+                        rowCount = rowCount + 1;
+                        item_info.put(String.valueOf(rowCount), new Object[]{billingModel.getItem_id(), billingModel.getItem_name(),
+                                billingModel.getQuantity(), String.valueOf(billingModel.getKot_no())});
+                    }
+
+                }*/
+
+                for (int i = 0; i<checkBoxIndex.size();i++)
+                {
+                    int index = Integer.parseInt(checkBoxIndex.get(i));
+                    BillingModel billingModel = modelObservableList.get(index);
+                    if (billingModel.isSendKot() ) {
+                        rowCount = rowCount + 1;
+                        item_info.put(String.valueOf(rowCount), new Object[]{billingModel.getItem_id(), billingModel.getItem_name(),
+                                billingModel.getQuantity(), String.valueOf(billingModel.getKot_no())});
+                    }
+                }
+
+        //Iterate over data and write to sheet
+        Set < String > keyid = item_info.keySet();
+        int rowid = rowCount;
+        for (String key : keyid) {
+
+            row = spreadsheet.createRow(rowid++);
+
+            Object [] objectArr = item_info.get(key);
+            int cellid = 0;
+
+            for (Object obj : objectArr){
+                Cell cell = row.createCell(cellid++);
+                cell.setCellValue((String)obj);
+                if (key.equals("0")) {
+                    UtilsClass.makeRowBold(workbook, row);
+                }else
+                {
+                    UtilsClass.makeDefaultText(workbook,row);
+                }
+            }
+        }
+
+
+                for (int i=0; i<10; i++){
+                    spreadsheet.autoSizeColumn(i);
+                }
+
+
+                try {
+             out =  new FileOutputStream(sheetFile);
+            workbook.write(out);
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+            }
+        });
+    }
+
+
+
 }
