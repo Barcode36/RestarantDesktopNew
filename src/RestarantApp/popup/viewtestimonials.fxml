@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="catRootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="380.0" prefWidth="550.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.popup.ViewTestimonyController">
+    <children>
+      <AnchorPane layoutX="10.0" layoutY="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="380.0" prefWidth="550.0" style="-fx-background-color: #008ccd; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 30, 0, 0, 0); -fx-border-color: white;">
+         <children>
+            <ProgressIndicator fx:id="progressCategory1" layoutX="280.0" layoutY="227.0" progress="0.0" visible="false" />
+            <ImageView fitHeight="40.0" fitWidth="171.0" layoutX="212.0" layoutY="19.0" pickOnBounds="true" preserveRatio="true" AnchorPane.topAnchor="19.0">
+               <image>
+                  <Image url="@../images/view_test.png" />
+               </image>
+            </ImageView>
+            <Label layoutX="92.0" layoutY="100.0" text="Customer Name :" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="79.0" layoutY="149.0" text="Customer Message :" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="90.0" layoutY="224.0" text="Customer Image :" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="13.0" />
+               </font>
+            </Label>
+            <Label layoutX="63.0" layoutY="325.0" text="Is it approved or not ? :" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="13.0" />
+               </font>
+            </Label>
+            <Label fx:id="labCustomerNAme" layoutX="209.0" layoutY="100.0" text="Label" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="16.0" />
+               </font>
+            </Label>
+            <Label fx:id="labCustomerMessage" layoutX="209.0" layoutY="146.0" text="Label" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="16.0" />
+               </font>
+            </Label>
+            <ImageView fx:id="imgCustomer" fitHeight="134.0" fitWidth="171.0" layoutX="198.0" layoutY="175.0" pickOnBounds="true" preserveRatio="true" />
+            <Label fx:id="labIsApproved" layoutX="209.0" layoutY="325.0" text="Label" textFill="WHITE">
+               <font>
+                  <Font name="Times New Roman Bold" size="16.0" />
+               </font>
+            </Label>
+            <ImageView fx:id="imgClose" fitHeight="37.0" fitWidth="29.0" layoutX="521.0" onMouseClicked="#imgClosed" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../images/clos1.png" />
+               </image>
+            </ImageView>
+         </children>
+      </AnchorPane>
+    </children>
+</StackPane>

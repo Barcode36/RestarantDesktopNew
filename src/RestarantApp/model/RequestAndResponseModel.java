@@ -5,9 +5,26 @@ import java.util.ArrayList;
 public class RequestAndResponseModel {
 
     String status_code, status_message, success,Status_code,Success,Status_message,Order_id;
-    int tot_cats;
+    int tot_cats,tot_suggestion;
     ArrayList<cat_list> cat_list = new ArrayList<>();
     ArrayList<variety_id_list> Variety_id_list = new ArrayList<>();
+    ArrayList<suggestion_list> suggestion_list = new ArrayList<>();
+
+    public ArrayList<suggestion_list> getSuggestion_list() {
+        return suggestion_list;
+    }
+
+    public int getTot_suggestion() {
+        return tot_suggestion;
+    }
+
+    public void setTot_suggestion(int tot_suggestion) {
+        this.tot_suggestion = tot_suggestion;
+    }
+
+    public void setSuggestion_list(ArrayList<suggestion_list> suggestion_list) {
+        this.suggestion_list = suggestion_list;
+    }
 
     public ArrayList<RequestAndResponseModel.variety_id_list> getVariety_id_list() {
         return Variety_id_list;
@@ -232,6 +249,34 @@ public class RequestAndResponseModel {
 
         public void setVariety_name(String variety_name) {
             Variety_name = variety_name;
+        }
+    }
+
+    public class suggestion_list{
+        String id,customer_name,suggestion;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getCustomer_name() {
+            return customer_name;
+        }
+
+        public void setCustomer_name(String customer_name) {
+            this.customer_name = customer_name;
+        }
+
+        public String getSuggestion() {
+            return suggestion;
+        }
+
+        public void setSuggestion(String suggestion) {
+            this.suggestion = suggestion;
         }
     }
 }

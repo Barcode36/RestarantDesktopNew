@@ -126,3 +126,27 @@
 .chart-legend-item{
 	-fx-text-fill: #fff;
 }
+
+.tree-cell:hover {
+	-fx-background-color: #f58220 ;
+	-fx-text-fill: #fff;
+	-fx-font-weight: bold;
+
+}
+
+.tree-cell:hover .highlight-on-hover {
+	-fx-text-fill: red ;
+}
+
+.tree-cell:selected {
+	-fx-background-color: #f58220 ;
+	-fx-font-size: 1.2em;
+	-fx-font-weight: bold;
+	-fx-text-fill: #fff;
+}
+.tree-cell{
+	-fx-font-size: 1.0em;
+	-fx-text-fill:#545454;
+	-fx-font-weight: bold;
+}
+

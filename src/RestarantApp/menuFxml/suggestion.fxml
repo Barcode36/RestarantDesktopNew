@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane fx:id="rootPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.menuClass.SuggestionController">
+    <children>
+        <AnchorPane prefHeight="418.0" prefWidth="580.0">
+            <children>
+                <TableView fx:id="tableIndex" fixedCellSize="40.0" layoutX="-3.0" AnchorPane.bottomAnchor="53.0" AnchorPane.leftAnchor="-3.0" AnchorPane.rightAnchor="3.0" AnchorPane.topAnchor="0.0">
+                    <columns>
+                        <TableColumn fx:id="tableSno" editable="false" prefWidth="50.0" sortable="false" text="S.No">
+                            <cellValueFactory><PropertyValueFactory property="id" />
+                            </cellValueFactory>
+
+                        </TableColumn>
+                        <TableColumn fx:id="tableCustomerName" editable="false" prefWidth="145.0" sortable="false" text="Customer Name">
+                            <cellValueFactory><PropertyValueFactory property="name" />
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="tableSuggestion" editable="false" prefWidth="382.0" sortable="false" text="Suggestion">
+                            <cellValueFactory><PropertyValueFactory property="tag_line" />
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            <ImageView fx:id="imgPrevious" fitHeight="33.0" fitWidth="96.0" layoutX="28.0" layoutY="369.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="24.0">
+               <image>
+                  <Image url="@../images/previous.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="imgNext" fitHeight="33.0" fitWidth="119.0" layoutX="504.0" layoutY="369.0" pickOnBounds="true" preserveRatio="true" AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="25.0">
+               <image>
+                  <Image url="@../images/next.png" />
+               </image>
+            </ImageView>
+            </children>
+        </AnchorPane>
+    </children>
+</StackPane>

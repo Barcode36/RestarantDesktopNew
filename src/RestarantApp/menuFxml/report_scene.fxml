@@ -12,14 +12,15 @@
     <children>
       <AnchorPane prefHeight="425.0" prefWidth="575.0">
          <children>
-            <BarChart fx:id="monthlyBar" layoutX="41.0" layoutY="66.0" prefHeight="330.0" prefWidth="506.0" AnchorPane.bottomAnchor="29.0" AnchorPane.leftAnchor="41.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="66.0">
+            <BarChart
+                    fx:id="monthlyBar" layoutX="41.0" layoutY="66.0" prefHeight="330.0" prefWidth="506.0" AnchorPane.bottomAnchor="29.0" AnchorPane.leftAnchor="41.0" AnchorPane.rightAnchor="28.0" AnchorPane.topAnchor="66.0">
               <xAxis>
                 <CategoryAxis side="BOTTOM" tickLabelFill="white" fx:id="xAxis">
                     <tickLabelFont>
                         <Font name="Times New Roman" size="14.0" />
                     </tickLabelFont>
                 </CategoryAxis>
-      
+
               </xAxis>
               <yAxis>
                 <NumberAxis label="''" side="LEFT" tickLabelFill="WHITE">

@@ -201,4 +201,28 @@ public interface APIService {
     @POST("video_gallery_edit.php")
     Call<RequestAndResponseModel> editVideo(@Field("x") JSONObject object);
 
+    @FormUrlEncoded
+    @POST("customer_history_details.php")
+    Call<HistoryDetails> getHistory(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("testimony_view.php")
+    Call<TestimonyDetails> getTestimony(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("testimony_delete.php")
+    Call<TestimonyDetails> deleteTestimony(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("testimony_approve.php")
+    Call<TestimonyDetails> approveTestimony(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("sales_report.php")
+    Call<ReportDeatils> getReportBasedOnDaily(@Field("x") JSONObject object);
+
+    @FormUrlEncoded
+    @POST("suggestions_view.php")
+    Call<RequestAndResponseModel> getSuggestionList(@Field("x") JSONObject object);
+
 }

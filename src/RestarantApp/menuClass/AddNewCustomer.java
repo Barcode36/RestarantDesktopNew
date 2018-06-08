@@ -106,12 +106,14 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
                             @Override
                             public void run() {
                                 if (loginRequestAndResponse.getStatus_code().equals(Constants.Failure)) {
-
+                                    LoginRequestAndResponse customer_id = LoginRequestAndResponse.getInstance();
+                                    customer_id.setCustomer_id(loginRequestAndResponse.getCustomer_id());
                                     jfxSnackbar.show("Customer details added successfully", 5000);
                                     txtMailId.setText(" ");
                                     txtName.setText(" ");
                                     txtAddress.setText(" ");
                                     txtMobileNumber.setText(" ");
+
                                 }else
                                 {
                                     jfxSnackbar.show("Aleady Exists customer", 5000);

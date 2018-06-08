@@ -29,6 +29,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Date;
 
 public class DashBoardController  {
 
@@ -43,12 +44,13 @@ public class DashBoardController  {
             ,add_Item ="Add Item",list_item = "List Item",tax = "Tax",add_tax = "Add Tax",list_tax = "List Tax",combo = " Combo Items",add_combo = "Add Combo Items",
             combo_item = "Combo Details",table="Table",add_table="Add Table",list_table = "List Table",customer = "Customer",add_customer="Add Customer",view_customer = "View Customer"
             ,notification="Notification",offers = "Offer",onBill = "OnBill",onItem= "OnItem",gallery = "Gallery", vip_gallery = "VIP Gallery"
-            ,video_gallery = "Video Gallery",list_vip_image = "List VIP Image",list_video = "List Video";
+            ,video_gallery = "Video Gallery",list_vip_image = "List VIP Image",list_video = "List Video",testimony = "Testimony",suggestion = "Suggestion";
 
     @FXML
     Button btnLogout;
     public void initialize() {
-
+        String css = DashBoardController.class.getResource("/RestarantApp/cssFile/Login.css").toExternalForm();
+        rootPane.getStylesheets().add(css);
         changePane("/RestarantApp/menuFxml/report_scene.fxml");
 
         TreeItem<String> treeItemRoot = new TreeItem<> (root);
@@ -65,7 +67,9 @@ public class DashBoardController  {
         TreeItem<String> notificationNode = new TreeItem<>(notification);
         TreeItem<String> offerNode= new TreeItem<>(offers);
         TreeItem<String> galleryNode = new TreeItem<>(gallery);
-        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode,notificationNode,offerNode,galleryNode);
+        TreeItem<String> testimnyNode = new TreeItem<>(testimony);
+        TreeItem<String> suggestionNode = new TreeItem<>(suggestion);
+        treeItemRoot.getChildren().addAll(monthlyNode, categoryNode,sub_categoryNode,varityNode,itemNode,taxNode,comboNode,tableNode,customerNode,notificationNode,offerNode,galleryNode,testimnyNode,suggestionNode);
 
         TreeItem<String> nodeItemA1 = new TreeItem<>(add_category);
         TreeItem<String> nodeItemA2 = new TreeItem<>(view_category);
@@ -112,6 +116,7 @@ public class DashBoardController  {
         treeItemRoot.setExpanded(true);
         lstMenu.setShowRoot(false);
         lstMenu.setRoot(treeItemRoot);
+        lstMenu.getStylesheets().add("/RestarantApp/cssFile/Login.css");
 
         lstMenu.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
             @Override
@@ -184,6 +189,10 @@ public class DashBoardController  {
                 }else if (selectedItem.getValue().equals(list_video))
                 {
                     changePane("/RestarantApp/menuFxml/video_list_scene.fxml");
+                }else if (selectedItem.getValue().equals(testimony)){
+                    changePane("/RestarantApp/menuFxml/listtestimonials.fxml");
+                }else if (selectedItem.getValue().equals(suggestion)){
+                    changePane("/RestarantApp/menuFxml/suggestion.fxml");
                 }
             }
         });
