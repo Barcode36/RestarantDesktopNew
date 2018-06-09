@@ -59,14 +59,16 @@ public class HistoryController implements Initializable {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 System.out.println(newValue);
-                searchHistoryNumber(newValue,"");
+                if (!newValue.isEmpty())
+                    searchHistoryNumber(newValue,"");
             }
         });
 
         txtName.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                searchHistoryNumber("",newValue);
+                if (newValue.isEmpty())
+                    searchHistoryNumber("",newValue);
             }
         });
 

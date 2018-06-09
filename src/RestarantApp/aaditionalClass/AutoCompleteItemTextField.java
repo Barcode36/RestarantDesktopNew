@@ -63,9 +63,10 @@ private SortedSet<String> entries = null;
                         for (int  i= 0 ; i < tempArray.size() ; i++)
                         {
                             String  s1 = tempArray.get(i);
+                            String actualValue = arrayList.get(i);
                             if (s1.contains(str))
                             {
-                                searchResult.add(s1);
+                                searchResult.add(actualValue);
                             }
                         }
                         /*searchResult.addAll(entries.subSet(getText(), getText() + Character.MAX_VALUE));
@@ -86,13 +87,14 @@ private SortedSet<String> entries = null;
                         for (int  i= 0 ; i < tempArray.size() ; i++)
                         {
                             String  s1 = tempArray.get(i);
+                            String actualValue = arrayList.get(i);
                             if (s1.contains(str))
                             {
-                                searchResult.add(s1);
+                                searchResult.add(actualValue);
                             }
                             if (s1.contains(str1))
                             {
-                                searchResult.add(s1);
+                                searchResult.add(actualValue);
                             }
                         }
 

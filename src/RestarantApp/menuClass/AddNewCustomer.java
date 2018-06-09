@@ -9,12 +9,15 @@ import RestarantApp.model.LoginRequestAndResponse;
 import com.jfoenix.controls.JFXSnackbar;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -40,7 +43,7 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
     @FXML
     ProgressIndicator progressAddCustomer;
     @FXML
-    Button btnCancel;
+    Button btnCancel,btnNewCustomer;
     public Boolean isNew;
     LoginRequestAndResponse loginRequestAndResponse = LoginRequestAndResponse.getInstance();
     @Override
@@ -65,10 +68,96 @@ public class AddNewCustomer implements Initializable,NetworkChangeListener {
             }
         });
 
+
+        txtMobileNumber.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtName.requestFocus();
+                            btnNewCustomer.setStyle("-fx-background-color:    #008ccd; ");
+                        }
+                    });
+                }
+            }
+        });
+        txtName.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtMailId.requestFocus();
+                            btnNewCustomer.setStyle("-fx-background-color:    #008ccd; ");
+                        }
+                    });
+                }
+            }
+        });
+
+        txtMailId.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtAddress.requestFocus();
+                            btnNewCustomer.setStyle("-fx-background-color:    #008ccd; ");
+                        }
+                    });
+                }
+            }
+        });
+
+
+        txtAddress.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+                    String s = txtAddress.getText().trim();
+                    txtAddress.setText("");
+                    txtAddress.setText(s);
+                    txtAddress.positionCaret(txtAddress.getText().length());
+                    btnNewCustomer.requestFocus();
+                    btnNewCustomer.setStyle("-fx-background-color: #f58220; ");
+//                    submitDetails();
+                }
+            }
+        });
+
+        btnNewCustomer.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+
+                    txtMobileNumber.requestFocus();
+                    btnNewCustomer.setStyle("-fx-background-color:   #008ccd; ");
+//                    submitDetails();
+                }else if (event.getCode().equals(KeyCode.ENTER)) {
+                    submitDetails();
+                }
+            }
+        });
+
     }
 
     public void btnNewOrder(ActionEvent actionEvent) {
-        submitDetails();
+        if (!txtName.getText().isEmpty() && !txtMobileNumber.getText().isEmpty())
+            submitDetails();
+        else
+            jfxSnackbar.show("Mobile Number and Name are mandatory", 5000);
     }
 
     public void submitDetails()

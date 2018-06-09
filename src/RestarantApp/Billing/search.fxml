@@ -13,9 +13,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="catRootPane" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.Billing.HistoryController">
+<StackPane fx:id="catRootPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.Billing.HistoryController">
     <children>
-        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="620.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" styleClass="mobilebg" stylesheets="@../cssFile/Login.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
+        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="620.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" styleClass="mobilebg" stylesheets="@../cssFile/Login.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
             <children>
                 <ProgressIndicator fx:id="progressCategory" layoutX="280.0" layoutY="227.0" progress="0.0" visible="false" />
             <Label layoutX="32.0" layoutY="117.0" prefHeight="24.0" prefWidth="41.0" text="Name" textFill="WHITE">
@@ -49,7 +49,7 @@
                   <Image url="@../images/searb.png" />
                </image>
             </ImageView>
-            <TableView fx:id="tableHistory" layoutX="24.0" layoutY="172.0" prefHeight="208.0" prefWidth="578.0">
+            <TableView fx:id="tableHistory" layoutX="24.0" layoutY="172.0" prefHeight="432.0" prefWidth="578.0" AnchorPane.bottomAnchor="4.0" AnchorPane.leftAnchor="24.0" AnchorPane.rightAnchor="18.0">
               <columns>
                 <TableColumn fx:id="tableColName" prefWidth="155.0" text="Name" />
                 <TableColumn fx:id="tableColCustId" prefWidth="88.0" text="Customer Id" />

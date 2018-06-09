@@ -14,16 +14,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import org.apache.commons.collections4.BagUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import retrofit2.Call;
@@ -51,6 +49,8 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
     JFXSnackbar jfxSnackbar;
     @FXML
     StackPane catRootPane;
+    @FXML
+    Button btnNewOrder;
     public void setAddItemListener(AddNewItemListener addItemListener)
     {
         this.addNewItemListener = addItemListener;
@@ -88,6 +88,7 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
             @Override
             public void run() {
                 txtMobileNumber.requestFocus();
+                btnNewOrder.setStyle("-fx-background-color:  #008ccd; ");
             }
         });
 
@@ -103,7 +104,9 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
+                            btnNewOrder.setStyle("-fx-background-color:  #008ccd; ");
                             txtName.requestFocus();
+
                         }
                     });
 
@@ -119,6 +122,7 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                         @Override
                         public void run() {
                             txtMailId.requestFocus();
+                            btnNewOrder.setStyle("-fx-background-color:  #008ccd; ");
                         }
                     });
 
@@ -135,6 +139,7 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
                         @Override
                         public void run() {
                             txtAddress.requestFocus();
+                            btnNewOrder.setStyle("-fx-background-color:  #008ccd; ");
                         }
                     });
 
@@ -145,9 +150,29 @@ public class AddNewItemController  implements Initializable,NetworkChangeListene
         txtAddress.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                if (event.getCode().equals(KeyCode.ENTER))
+                if (event.getCode().equals(KeyCode.TAB))
                 {
-                    System.out.print("Enter key");
+                    String s = txtAddress.getText().trim();
+                    txtAddress.setText("");
+                    txtAddress.setText(s);
+                    txtAddress.positionCaret(txtAddress.getText().length());
+                    btnNewOrder.requestFocus();
+                    btnNewOrder.setStyle("-fx-background-color: #ff0000; ");
+//                    submitDetails();
+                }
+            }
+        });
+
+        btnNewOrder.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.TAB))
+                {
+
+                    txtMobileNumber.requestFocus();
+                    btnNewOrder.setStyle("-fx-background-color:  #008ccd; ");
+//                    submitDetails();
+                }else if (event.getCode().equals(KeyCode.ENTER)) {
                     submitDetails();
                 }
             }
