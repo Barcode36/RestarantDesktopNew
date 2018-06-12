@@ -482,56 +482,59 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 selectedRoot = String.valueOf(listTreeItem.getSelectionModel().getSelectedItem().getValue());
 
                 ContextMenu contextMenu = new ContextMenu();
-                MenuItem deleteItem = new MenuItem();
-                deleteItem.textProperty().bind(Bindings.format("Delete \"%s\"", selectedRoot));
-                deleteItem.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                        alert.setTitle("Confirmation Dialog");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Are you want to Cancel this Order?");
 
-                        Optional<ButtonType> result = alert.showAndWait();
-                        if (result.get() == ButtonType.OK) {
-                            TreeItem<TableTreeItem> selected = listTreeItem.getSelectionModel().getSelectedItem();
-                            selected.getParent().getChildren().remove(selected);
-                            rootItem.remove(selectedRoot);
-                            checkBoxIndex = new ArrayList<>();
-                            tableList.remove(selectedTable);
-                            if (rootItem.size() == 0)
-                                modelObservableList.clear();
-                        } else {
-                            alert.close();
 
-                        }
-                    }
-                });
-
-                MenuItem printItem = new MenuItem();
-                printItem.textProperty().bind(Bindings.format("Print Kot \"%s\"", selectedRoot));
-                printItem.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        String kotNumber = String.valueOf(selectedRoot);
-                        printKotBased(kotNumber);
-
-                    }
-                });
                 if (rootItem.contains(selectedRoot)) {
                     System.out.println("Selected Text yes:----> " + selectedRoot);
+                    String name = "Delete " +selectedRoot;
+                    MenuItem deleteItem = new MenuItem(name);
+//                    deleteItem.textProperty().bind(Bindings.format("Delete \"%s\"", selectedRoot));
+                    deleteItem.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                            alert.setTitle("Confirmation Dialog");
+                            alert.setHeaderText(null);
+                            alert.setContentText("Are you want to Cancel this Order?");
+
+                            Optional<ButtonType> result = alert.showAndWait();
+                            if (result.get() == ButtonType.OK) {
+                                TreeItem<TableTreeItem> selected = listTreeItem.getSelectionModel().getSelectedItem();
+                                selected.getParent().getChildren().remove(selected);
+                                rootItem.remove(selectedRoot);
+                                checkBoxIndex = new ArrayList<>();
+                                tableList.remove(selectedTable);
+                                tableBill.refresh();
+                                listTreeItem.refresh();
+                                if (rootItem.size() == 0)
+                                    modelObservableList.clear();
+                            } else {
+                                alert.close();
+
+                            }
+                        }
+                    });
                     contextMenu.getItems().add(deleteItem);
+                    listTreeItem.setContextMenu(contextMenu);
                 } else {
                     System.out.println("Selected Text No:----> " + selectedRoot);
+                    String name = "Print kot " +selectedRoot;
+                    MenuItem printItem = new MenuItem(name);
+
+//                    printItem.textProperty().bind(Bindings.format("Print Kot \"%s\"", selectedRoot));
+                    printItem.setOnAction(new EventHandler<ActionEvent>() {
+                        @Override
+                        public void handle(ActionEvent event) {
+                            String kotNumber = String.valueOf(selectedRoot);
+                            printKotBased(kotNumber);
+
+                        }
+                    });
                     contextMenu.getItems().add(printItem);
+                    listTreeItem.setContextMenu(contextMenu);
 
                 }
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        listTreeItem.setContextMenu(contextMenu);
-                    }
-                });
+
                 txtFieldId.requestFocus();
 
                 String value = null;
@@ -971,24 +974,19 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     public void nertworkChanged()
     {
-        FileInputStream input = null;
+        Image image2 = null;
         if (isConnectedNetwork) {
 
-            try {
-                input = new FileInputStream("src/RestarantApp/images/online.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+
+                image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/online.png"));
+
         }else
         {
-            try {
-                input = new FileInputStream("src/RestarantApp/images/offline.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+             image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/offline.png"));
+
         }
-        Image image = new Image(input);
-        imgConectionStatus.setImage(image);
+
+        imgConectionStatus.setImage(image2);
     }
 
     public void setIsPlaced()
@@ -998,41 +996,20 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             billingModel.isPlacedSale();
             if (billingModel.isPlacedSale()) {
                 tableBill.setEditable(false);
-                FileInputStream input = null;
-
-                try {
-                    input = new FileInputStream("src/RestarantApp/images/closesale.png");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Image image = new Image(input);
-                imgPlaceOrder.setImage(image);
+                Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/closesale.png"));
+                imgPlaceOrder.setImage(image2);
                 btnAddItem.setOnMouseClicked(null);
             } else {
                 tableBill.setEditable(true);
-                FileInputStream input = null;
-
-                try {
-                    input = new FileInputStream("src/RestarantApp/images/placeorder.png");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Image image = new Image(input);
-                imgPlaceOrder.setImage(image);
+                Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/placeorder.png"));
+                imgPlaceOrder.setImage(image2);
                 btnAddItem.setOnMouseClicked(this::btnAddItem);
             }
         }else
         {
             tableBill.setEditable(true);
-            FileInputStream input = null;
-
-            try {
-                input = new FileInputStream("src/RestarantApp/images/placeorder.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            Image image = new Image(input);
-            imgPlaceOrder.setImage(image);
+            Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/placeorder.png"));
+            imgPlaceOrder.setImage(image2);
             btnAddItem.setOnMouseClicked(this::btnAddItem);
             txtTotalAmount.setText("");
             txtFiledDiscount.setText("");
@@ -1069,6 +1046,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 //                        checkBox.setSelected(true);
                             BillingModel billingModel = modelObservableList.get(item-1);
                             checkBox.setText(String.valueOf(billingModel.getS_no()));
+                            String index = String.valueOf(item -1);
                             if (billingModel.isSendKot)
                             {
                                 checkBox.setSelected(false);
@@ -1078,10 +1056,16 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                             if (billingModel.isSelected())
                             {
                                 checkBox.setSelected(true);
+
                             }else
                             {
                                 checkBox.setSelected(false);
                             }
+
+                            if (billingModel.getKot_no() == 0 && !billingModel.isSendKot() && !checkBoxIndex.contains(index) && billingModel.isSelected()) {
+                                checkBoxIndex.add(index);
+                            }
+                            System.out.println("Check box index---->"+checkBoxIndex.size());
                             setGraphic(checkBox);
 
                             checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
@@ -1410,7 +1394,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                                     String amount = String.valueOf(amt);
                                     serialNo = billingModelList.getS_no();
                                     billingModel = new BillingModel(serialNo, selectedItem.getItem_name(), "notes" ,String.valueOf(newQty), selectedItem.getPrice(), amount, selectedItem.getShort_code(),customer_id,from,false,false);
-                                    if (getSendKot.containsKey(selectedTable))
+                                    if (getSendKot.containsKey(selectedTable) && billingModelList.getKot_no() != 0)
                                     {
                                         changeSNo();
                                         double amtChenged = Double.valueOf(txtQty.getText());
@@ -1469,7 +1453,8 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                     txtFieldId.clear();
                     txtFieldName.clear();
 
-
+                    int index = rootItem.indexOf(UtilsClass.getKeyFromValue(tableListValue,modelObservableList));
+                    listTreeItem.getSelectionModel().select(index);
             }
 
                 serialNo++;
@@ -2109,17 +2094,13 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 //        Platform.runLater(new Runnable() {
 //            @Override
 //            public void run() {
-                FileInputStream input = null;
 
+        Image image2 = null;
                 if (isConnected) {
 
             isConnectedNetwork = isConnected;
-            try {
-                input = new FileInputStream("src/RestarantApp/images/online.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
 
+                    image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/online.png"));
             if (sqliteConnection != null) {
                 int tableCount = sqliteConnection.tableCount();
                 if (tableCount != 0) {
@@ -2130,15 +2111,9 @@ public class BillingController implements Initializable, ItemSelectedListener, G
         }else
         {
             isConnectedNetwork = isConnected;
-            try {
-                input = new FileInputStream("src/RestarantApp/images/offline.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+            image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/offline.png"));
         }
-        Image image = new Image(input);
-        imgConectionStatus.setImage(image);
-
+        imgConectionStatus.setImage(image2);
 //
 //            }
 //        });
@@ -2301,27 +2276,25 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
 //                listTableList.getItems().remove(listTableList.getSelectionModel().getSelectedItem());
                 String key =(String) UtilsClass.getKeyFromValue(tableListValue,modelObservableList);
-                System.out.println("key value--->"+key);
                 int index = rootItem.indexOf(key);
                 TreeItem<TableTreeItem> selected = listTreeItem.getRoot().getChildren().get(index);
                 selected.getParent().getChildren().remove(selected);
                 tableListValue.remove(key);
+                if (rootItem.size() > 1)
+                    selectedTable = rootItem.get(index + 1);
                 rootItem.remove(key);
                 checkBoxIndex = new ArrayList<>();
                 tableList.remove(selectedRoot);
-                if (rootItem.size() ==0)
-                    modelObservableList.clear();
-                FileInputStream input = null;
-
-                try {
-                    input = new FileInputStream("src/RestarantApp/images/placeorder.png");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Image image = new Image(input);
-                imgPlaceOrder.setImage(image);
                 btnAddItem.setOnMouseClicked(this::btnAddItem);
-                selectedTable = null;
+                if (rootItem.size() ==0) {
+                    modelObservableList.clear();
+                    selectedTable = null;
+                }
+                listTreeItem.refresh();
+                tableBill.refresh();
+                Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/placeorder.png"));
+                imgPlaceOrder.setImage(image2);
+
 
             }
         }else
@@ -2337,17 +2310,31 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 //                listTableList.getItems().remove(listTableList.getSelectionModel().getSelectedItem());
                 modelObservableList.clear();
                 modelObservableList =FXCollections.observableArrayList();
-                FileInputStream input = null;
-
-                try {
-                    input = new FileInputStream("src/RestarantApp/images/placeorder.png");
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                Image image = new Image(input);
-                imgPlaceOrder.setImage(image);
+                Image image2 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/placeorder.png"));
+                imgPlaceOrder.setImage(image2);
                 btnAddItem.setOnMouseClicked(this::btnAddItem);
                 selectedTable = null;
+
+
+                String key =(String) UtilsClass.getKeyFromValue(tableListValue,modelObservableList);
+                int index = rootItem.indexOf(key);
+                TreeItem<TableTreeItem> selected = listTreeItem.getRoot().getChildren().get(index);
+                selected.getParent().getChildren().remove(selected);
+                tableListValue.remove(key);
+                if (rootItem.size() > 0)
+                    selectedTable = rootItem.get(index + 1);
+                rootItem.remove(key);
+                checkBoxIndex = new ArrayList<>();
+                tableList.remove(selectedRoot);
+                btnAddItem.setOnMouseClicked(this::btnAddItem);
+                if (rootItem.size() ==0) {
+                    modelObservableList.clear();
+                    selectedTable = null;
+                }
+                listTreeItem.refresh();
+                tableBill.refresh();
+                Image image3 = new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/placeorder.png"));
+                imgPlaceOrder.setImage(image3);
 
             }
 
@@ -2651,14 +2638,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
             }
 
             tableBill.setEditable(false);
-            FileInputStream input = null;
-
-            try {
-                input = new FileInputStream("src/RestarantApp/images/closesale.png");
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-            Image image = new Image(input);
+            Image image =  new Image(BillingController.class.getResourceAsStream("/RestarantApp/images/closesale.png"));
             imgPlaceOrder.setImage(image);
             btnAddItem.setOnMouseClicked(null);
 
@@ -2677,7 +2657,7 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
     public void printKot()
     {
-        if (modelObservableList.size() != 0) {
+        if (modelObservableList.size() != 0 && checkBoxIndex.size() != 0) {
            ChoiceDialog dialog = new ChoiceDialog(Printer.getDefaultPrinter(), Printer.getAllPrinters());
             dialog.setHeaderText("Choose the printer!");
             dialog.setContentText("Choose a printer from available printers");
@@ -2795,13 +2775,17 @@ public class BillingController implements Initializable, ItemSelectedListener, G
 
                     }
                     generateXsl(checkBoxIndex);
+                    System.out.println("Check box index in kot---->"+checkBoxIndex.size());
                     checkBoxIndex = new ArrayList<>();
                     cb.setSelected(false);
                     tableBill.refresh();
+
                 }
 
 
                 addTreeView();
+                int index = rootItem.indexOf(UtilsClass.getKeyFromValue(tableListValue,modelObservableList));
+                listTreeItem.getSelectionModel().select(index);
                 String line = " ------------------------------------\n";
                 String total_item = "                  Total Item(s)  " + totalQty[0];
                 header = header + listItem + item_header + item[0] + line + total_item + "\n\n\n\n\n\n\n";
@@ -2826,30 +2810,31 @@ public class BillingController implements Initializable, ItemSelectedListener, G
                 });
 
 
-                Printer printer = opt.get();
-                printerService.printString(printer.getName(), header);
-                byte[] cutP = new byte[]{0x1d, 'V', 1};
+                  /*  Printer printer = opt.get();
+                    printerService.printString(printer.getName(), header);
+                    byte[] cutP = new byte[]{0x1d, 'V', 1};
 
-                printerService.printBytes("RP3150 STAR(U) 1", cutP);
-
-
-                tableBill.setRowFactory(tv -> new TableRow<BillingModel>() {
-                    @Override
-                    public void updateItem(BillingModel item, boolean empty) {
-                        super.updateItem(item, empty);
-                        if (item == null) {
-                            setStyle("");
-                        } else if (item.isSendKot()) {
+                    printerService.printBytes("RP3150 STAR(U) 1", cutP);*/
 
 
-                            setStyle("-fx-background-color: #ffcad0;");
+                    tableBill.setRowFactory(tv -> new TableRow<BillingModel>() {
+                        @Override
+                        public void updateItem(BillingModel item, boolean empty) {
+                            super.updateItem(item, empty);
+                            if (item == null) {
+                                setStyle("");
+                            } else if (item.isSendKot()) {
 
 
-                        } else {
-                            setStyle("");
+                                setStyle("-fx-background-color: #ffcad0;");
+
+
+                            } else {
+                                setStyle("");
+                            }
                         }
-                    }
-                });
+                    });
+
 
             } else {
 

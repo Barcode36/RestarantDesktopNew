@@ -139,7 +139,7 @@
 }
 
 .tree-cell:selected {
-	-fx-background-color: #f58220 ;
+	-fx-background-color: #008ccd ;
 	-fx-font-size: 1.2em;
 	-fx-font-weight: bold;
 	-fx-text-fill: #fff;
