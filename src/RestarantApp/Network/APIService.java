@@ -225,4 +225,8 @@ public interface APIService {
     @POST("suggestions_view.php")
     Call<RequestAndResponseModel> getSuggestionList(@Field("x") JSONObject object);
 
+    @FormUrlEncoded
+    @POST("update_order.php")
+    Call<RequestAndResponseModel> updateOrederId(@Field("x") JSONObject object);
+
 }

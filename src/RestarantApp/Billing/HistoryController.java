@@ -137,9 +137,10 @@ public class HistoryController implements Initializable {
                     for (int j= 0 ; j < listRequestAndResponseModel.getItem_list().size() ; j++)
                     {
                         ItemListRequestAndResponseModel.item_list item_list = listRequestAndResponseModel.getItem_list().get(j);
-                        itemDetails.put(item_list.getShort_code(),item_list.getItem_name());
+                        itemDetails.put(item_list.getItem_id(),item_list.getItem_name());
                     }
 
+                    searchHistoryNumber("","");
                 }
             }
 
@@ -188,7 +189,7 @@ public class HistoryController implements Initializable {
                             historyDetailsList.setHistoryDate(customer_list.getDate());
                             ArrayList<HistoryDetails.items> items = customer_list.getItems();
                             String itemList = "";
-                            if (items !=  null)
+                            if (items !=  null && customer_list.getStatus_code().equals(Constants.Success))
                             {
 
                                 for (int j = 0 ; j < items.size() ; j ++){
@@ -198,14 +199,11 @@ public class HistoryController implements Initializable {
                                     itemList = itemList + itemIds + ",";
                                 }
 
-
                                 itemList = itemList.substring(0,itemList.length()-1);
                                 historyDetailsList.setItems(itemList);
-                            }else if (customer_list.getStatus_code().equals(Constants.Failure))
-                            {
-                                historyDetailsList.setItems(itemList);
+                                historyDetailsLists.add(historyDetailsList);
                             }
-                            historyDetailsLists.add(historyDetailsList);
+
 
                         }
                     }

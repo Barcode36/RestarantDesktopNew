@@ -15,7 +15,7 @@
 
 <StackPane fx:id="catRootPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="RestarantApp.Billing.HistoryController">
     <children>
-        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="620.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" styleClass="mobilebg" stylesheets="@../cssFile/Login.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
+        <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="720.0" style="-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);" styleClass="mobilebg" stylesheets="@../cssFile/Login.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" BorderPane.alignment="CENTER">
             <children>
                 <ProgressIndicator fx:id="progressCategory" layoutX="280.0" layoutY="227.0" progress="0.0" visible="false" />
             <Label layoutX="32.0" layoutY="117.0" prefHeight="24.0" prefWidth="41.0" text="Name" textFill="WHITE">
@@ -29,15 +29,15 @@
                   <Image url="@../images/searciicon.png" />
                </image>
             </ImageView>
-            <Pane layoutX="591.0" prefHeight="30.0" prefWidth="30.0" style="-fx-border-color: #f5ad70;" />
-            <ImageView fx:id="imgClose" fitHeight="25.0" fitWidth="25.0" layoutX="594.0" layoutY="3.0" onMouseClicked="#viewCloseImageAction" pickOnBounds="true" preserveRatio="true">
+            <Pane layoutX="692.0" prefHeight="30.0" prefWidth="30.0" style="-fx-border-color: #f5ad70;" />
+            <ImageView fx:id="imgClose" fitHeight="25.0" fitWidth="25.0" layoutX="695.0" layoutY="3.0" onMouseClicked="#viewCloseImageAction" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@../images/close.png" />
                </image>
             </ImageView>
-            <Pane layoutX="561.0" prefHeight="30.0" prefWidth="30.0" style="-fx-border-color: #f5ad70;">
+            <Pane layoutX="663.0" prefHeight="30.0" prefWidth="30.0" style="-fx-border-color: #f5ad70;">
                <children>
-                  <ImageView fitHeight="16.0" fitWidth="25.0" layoutX="7.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="16.0" fitWidth="25.0" layoutX="6.0" layoutY="8.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/min.png" />
                      </image>
